@@ -2,7 +2,7 @@ import { Diagnostic } from "@codemirror/lint";
 import { EditorView } from "@codemirror/view";
 import { parseJsonValue } from "../json/json_parser";
 import { validateSchema } from "../json/schema_validator";
-import { JsonError, TypeDefinition, Hint } from "../json/types";
+import { Hint, JsonError, TypeDefinition } from "../json/types";
 
 export function jsonLinter(
   schema: TypeDefinition,

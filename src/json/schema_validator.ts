@@ -3,13 +3,13 @@ import { parseJsonValue } from "./json_parser";
 import { toJson } from "./to_json";
 import type {
   FieldDefinition,
+  Hint,
   JsonError,
   JsonObject,
   JsonValue,
   PrimitiveType,
   RecordDefinition,
   TypeDefinition,
-  Hint,
   TypeSignature,
   ValidationResult,
   VariantDefinition,
@@ -65,7 +65,7 @@ class SchemaValidator {
     const pushTypeHint = (): void => {
       const typeDesc = getTypeDesc(schema);
       const typeDoc = getTypeDoc(schema, idToRecordDef);
-      const message = typeDoc ? `${typeDesc}\n\n${typeDoc}` : typeDesc
+      const message = typeDoc ? `${typeDesc}\n\n${typeDoc}` : typeDesc;
       void this.hints.push({
         segment: value.segment,
         message: message,
