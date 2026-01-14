@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { css, html, LitElement, TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 
 import { classMap } from "lit/directives/class-map.js";
 import {
@@ -510,21 +510,42 @@ export class App extends LitElement {
       const reqJsonCode = requestEditor.state.doc.toString();
       validateOrThrowError(reqJsonCode, method.request);
       const reqJson = JSON.parse(reqJsonCode);
-      const response = await fetch(serviceUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        },
-        body: JSON.stringify(
-          {
-            method: method.method,
-            request: reqJson,
+
+      let fetchUrl: string;
+      let fetchOptions: RequestInit;
+
+      if (this.sendWithGet) {
+        const bodyJson = JSON.stringify({
+          method: method.method,
+          request: reqJson,
+        });
+        fetchUrl = `${serviceUrl}?${encodeURIComponent(bodyJson)}`;
+        fetchOptions = {
+          method: "GET",
+          headers: {
+            Authorization: authorizationHeader,
           },
-          null,
-          2,
-        ),
-      });
+        };
+      } else {
+        fetchUrl = serviceUrl;
+        fetchOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authorizationHeader,
+          },
+          body: JSON.stringify(
+            {
+              method: method.method,
+              request: reqJson,
+            },
+            null,
+            2,
+          ),
+        };
+      }
+
+      const response = await fetch(fetchUrl, fetchOptions);
 
       if (!response.ok) {
         let errorMessage = `HTTP error ${response.status}`;
@@ -566,6 +587,10 @@ export class App extends LitElement {
   private methodList: MethodListState = { kind: "zero-state" };
   @state()
   private selectedMethod?: MethodBundle;
+
+  // For testing that services work when using GET instead of POST
+  @property({ type: Boolean, attribute: "send-with-get" })
+  sendWithGet: boolean = false;
 
   private get requestEditor(): Editor | null {
     return this.renderRoot.querySelector<Editor>("#request-editor");
