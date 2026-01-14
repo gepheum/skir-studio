@@ -9,7 +9,7 @@ import type {
   PrimitiveType,
   RecordDefinition,
   TypeDefinition,
-  TypeHint,
+  Hint,
   TypeSignature,
   ValidationResult,
   VariantDefinition,
@@ -28,7 +28,7 @@ export function validateSchema(
   validator.validate(value, schema.type);
   return {
     errors: validator.errors,
-    typeHints: validator.typeHints,
+    hints: validator.hints,
   };
 }
 
@@ -57,15 +57,20 @@ export function validateOrThrowError(
 class SchemaValidator {
   constructor(readonly idToRecordDef: { [id: string]: RecordDefinition }) {}
   readonly errors: JsonError[] = [];
-  readonly typeHints: TypeHint[] = [];
+  readonly hints: Hint[] = [];
 
   validate(value: JsonValue, schema: TypeSignature): void {
+    const { idToRecordDef } = this;
     value.expectedType = schema;
-    const pushTypeHint = (): void =>
-      void this.typeHints.push({
+    const pushTypeHint = (): void => {
+      const typeDesc = getTypeDesc(schema);
+      const typeDoc = getTypeDoc(schema, idToRecordDef);
+      const message = typeDoc ? `${typeDesc}\n\n${typeDoc}` : typeDesc
+      void this.hints.push({
         segment: value.segment,
-        typeDesc: getTypeDesc(schema),
+        message: message,
       });
+    };
     switch (schema.kind) {
       case "array": {
         if (value.kind === "array") {
@@ -104,7 +109,7 @@ class SchemaValidator {
         break;
       }
       case "record": {
-        const recordDef = this.idToRecordDef[schema.value];
+        const recordDef = idToRecordDef[schema.value];
         if (recordDef.kind === "struct") {
           const nameToFieldDef: { [name: string]: FieldDefinition } = {};
           recordDef.fields.forEach((field) => {
@@ -117,6 +122,12 @@ class SchemaValidator {
               const { key, value } = keyValue;
               const fieldDef = nameToFieldDef[key];
               if (fieldDef) {
+                if (fieldDef.doc) {
+                  this.hints.push({
+                    segment: keyValue.segment,
+                    message: fieldDef.doc,
+                  });
+                }
                 this.validate(value, fieldDef.type!);
               } else {
                 this.errors.push({
@@ -339,4 +350,23 @@ function getTypeDesc(type: TypeSignature): string {
   const typePart = getTypePart(type);
   const modulePart = getModulePart(type);
   return modulePart ? `${typePart} (${modulePart})` : typePart;
+}
+
+function getTypeDoc(
+  type: TypeSignature,
+  idToRecordDef: Readonly<{ [id: string]: RecordDefinition }>,
+): string | undefined {
+  switch (type.kind) {
+    case "primitive":
+      return undefined;
+    case "array":
+      return getTypeDoc(type.value.item, idToRecordDef);
+    case "optional":
+      return getTypeDoc(type.value, idToRecordDef);
+    case "record": {
+      const recordId = type.value;
+      const recordDef = idToRecordDef[recordId]!;
+      return recordDef.doc;
+    }
+  }
 }

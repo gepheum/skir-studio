@@ -20,7 +20,7 @@ describe("schema_validator", () => {
     };
     const result = validateSchema(parse("123"), schema);
     expect(result).toMatch({ errors: [] });
-    if (result.typeHints.length === 0) {
+    if (result.hints.length === 0) {
       throw new Error("Expected type hints");
     }
   });

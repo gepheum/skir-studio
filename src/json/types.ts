@@ -36,6 +36,7 @@ export interface JsonArray {
 }
 
 export interface JsonKeyValue {
+  /// For the key.
   segment: Segment;
   key: string;
   value: JsonValue;
@@ -155,12 +156,12 @@ export type VariantDefinition = {
 // SCHEMA VALIDATION
 // -----------------------------------------------------------------------------
 
-export interface TypeHint {
+export interface Hint {
   segment: Segment;
-  typeDesc: string;
+  message: string;
 }
 
 export interface ValidationResult {
   errors: JsonError[];
-  typeHints: TypeHint[];
+  hints: Hint[];
 }

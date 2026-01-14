@@ -2,7 +2,7 @@ import { Diagnostic } from "@codemirror/lint";
 import { EditorView } from "@codemirror/view";
 import { parseJsonValue } from "../json/json_parser";
 import { validateSchema } from "../json/schema_validator";
-import { JsonError, TypeDefinition, TypeHint } from "../json/types";
+import { JsonError, TypeDefinition, Hint } from "../json/types";
 
 export function jsonLinter(
   schema: TypeDefinition,
@@ -16,7 +16,7 @@ export function jsonLinter(
     }
 
     const validationResult = validateSchema(parseResult, schema);
-    const { errors, typeHints } = validationResult;
+    const { errors, hints: typeHints } = validationResult;
     return errors
       .map(errorToDiagnostic)
       .concat(typeHints.map(typeHintToDiagnostic));
@@ -34,11 +34,11 @@ function errorToDiagnostic(error: JsonError): Diagnostic {
   };
 }
 
-function typeHintToDiagnostic(typeHint: TypeHint): Diagnostic {
+function typeHintToDiagnostic(typeHint: Hint): Diagnostic {
   return {
     from: typeHint.segment.start,
     to: typeHint.segment.end,
-    message: typeHint.typeDesc,
+    message: typeHint.message,
     severity: "info",
   };
 }
