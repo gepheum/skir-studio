@@ -45,7 +45,7 @@ export function makeJsonTemplate(
         );
       } else {
         // Enum
-        return "?";
+        return "UNKNOWN";
       }
     }
     case "primitive": {

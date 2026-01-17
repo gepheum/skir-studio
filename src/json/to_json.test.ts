@@ -144,7 +144,7 @@ describe("to_json", () => {
         },
       };
       const type: TypeSignature = { kind: "record", value: "MyEnum" };
-      expect(makeJsonTemplate(type, records)).toBe("?");
+      expect(makeJsonTemplate(type, records)).toBe("UNKNOWN");
     });
   });
 });

@@ -119,7 +119,7 @@ export function jsonCompletion(
             label: v.name,
           }))
           .concat({
-            label: "?",
+            label: "UNKNOWN",
           });
         return {
           from: jsonValue.segment.start + 1,

@@ -156,7 +156,7 @@ class SchemaValidator {
           } else if (value.kind === "literal" && value.type === "string") {
             const name = JSON.parse(value.jsonCode);
             const fieldDef = nameToVariantDef[name];
-            if (name === "?" || fieldDef) {
+            if (name === "UNKNOWN" || fieldDef) {
               pushTypeHint();
             } else {
               this.errors.push({
