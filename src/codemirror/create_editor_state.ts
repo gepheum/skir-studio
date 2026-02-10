@@ -1,6 +1,6 @@
 import { autocompletion } from "@codemirror/autocomplete";
 import { json } from "@codemirror/lang-json";
-import { linter, lintGutter } from "@codemirror/lint";
+import { linter } from "@codemirror/lint";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
@@ -42,7 +42,6 @@ function createEditorState(
       autocompletion({
         override: [jsonCompletion(schema)],
       }),
-      lintGutter(),
       EditorView.theme({
         "&": {
           fontSize: "14px",
@@ -50,6 +49,10 @@ function createEditorState(
         },
         ".cm-editor": {
           height: "400px",
+        },
+        ".cm-lintRange-info": {
+          backgroundImage:
+            "repeating-linear-gradient(135deg, transparent 0, transparent 2px, rgba(100, 100, 100, 0.15) 2px, rgba(100, 100, 100, 0.15) 3px)",
         },
       }),
     ],

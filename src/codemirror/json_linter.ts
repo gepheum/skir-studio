@@ -40,5 +40,11 @@ function typeHintToDiagnostic(typeHint: Hint): Diagnostic {
     to: typeHint.segment.end,
     message: typeHint.message,
     severity: "info",
+    renderMessage: () => {
+      const dom = document.createElement("div");
+      dom.textContent = typeHint.message;
+      return dom;
+    },
+    markClass: "",
   };
 }
