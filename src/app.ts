@@ -76,7 +76,8 @@ export class App extends LitElement {
       margin-bottom: 0.25rem;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="password"] {
       padding: 0.75rem 1rem;
       border: 2px solid #e2e8f0;
       border-radius: 0.5rem;
@@ -85,7 +86,8 @@ export class App extends LitElement {
       background: white;
     }
 
-    input[type="text"]:focus {
+    input[type="text"]:focus,
+    input[type="password"]:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -372,7 +374,7 @@ export class App extends LitElement {
       <div class="input-group">
         <label for="authorization-header">Authorization Header</label>
         <input
-          type="text"
+          type="password"
           autocomplete="off"
           placeholder="Bearer your-token-here"
           id="authorization-header"
