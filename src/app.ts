@@ -102,6 +102,64 @@ export class App extends LitElement {
       gap: 1rem;
     }
 
+    .doc-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: help;
+      transition: all 0.2s ease;
+    }
+
+    .doc-badge:hover {
+      background: #764ba2;
+      transform: scale(1.1);
+    }
+
+    .doc-badge .tooltip {
+      visibility: hidden;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #1f2937;
+      color: white;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 400;
+      white-space: pre-wrap;
+      min-width: 250px;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .doc-badge .tooltip::after {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-bottom-color: #1f2937;
+    }
+
+    .doc-badge:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
     select {
       padding: 0.75rem 1rem;
       border: 2px solid #e2e8f0;
@@ -418,6 +476,12 @@ export class App extends LitElement {
             </option>`,
         )}
       </select>
+      ${this.selectedMethod?.method.doc
+        ? html`<div class="doc-badge">
+            ?
+            <div class="tooltip">${this.selectedMethod.method.doc}</div>
+          </div>`
+        : ""}
     </div>`;
   }
 
@@ -613,6 +677,7 @@ interface Method {
   number: number;
   request: TypeDefinition;
   response: TypeDefinition;
+  doc?: string;
 }
 
 interface MethodList {
