@@ -46,6 +46,7 @@ function createEditorState(
       EditorView.theme({
         "&": {
           fontSize: "14px",
+          fontFamily: "'JetBrains Mono', monospace",
         },
         ".cm-editor": {
           height: "400px",
