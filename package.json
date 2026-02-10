@@ -43,7 +43,7 @@
     "json5": "^2.2.3",
     "lit": "^3.2.0",
     "nanoevents": "^9.1.0",
-    "skir-client": "^1.0.8"
+    "skir-client": "^1.0.9"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.6.3",
