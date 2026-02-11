@@ -69,6 +69,13 @@ export class App extends LitElement {
       min-width: 300px;
     }
 
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+      flex: 1;
+    }
+
     label {
       font-size: 0.875rem;
       font-weight: 500;
@@ -78,7 +85,7 @@ export class App extends LitElement {
 
     input[type="text"],
     input[type="password"] {
-      padding: 0.75rem 1rem;
+      padding: 0.5rem 1rem;
       border: 2px solid #e2e8f0;
       border-radius: 0.5rem;
       font-size: 0.875rem;
@@ -247,7 +254,7 @@ export class App extends LitElement {
       padding: 0.5rem 1.5rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      border: none;
+      border: 2px solid transparent;
       border-radius: 0.5rem;
       font-size: 0.875rem;
       font-weight: 500;
@@ -471,7 +478,7 @@ export class App extends LitElement {
         />
       </div>
 
-      <div class="input-group">
+      <div class="button-group">
         <button @click=${onClick}>Fetch Methods</button>
       </div>
     </div>`;
