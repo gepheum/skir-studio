@@ -45,6 +45,8 @@ function createEditorState(
       EditorView.theme({
         "&": {
           fontSize: "14px",
+        },
+        ".cm-scroller": {
           fontFamily: "'JetBrains Mono', monospace",
         },
         ".cm-editor": {
