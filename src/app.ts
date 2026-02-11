@@ -197,7 +197,7 @@ export class App extends LitElement {
     }
 
     .panel-header {
-      padding: 1rem 1.5rem;
+      padding: 0.75rem 1.5rem;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
       font-weight: 600;
@@ -205,6 +205,8 @@ export class App extends LitElement {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      min-height: 3.75rem;
+      box-sizing: border-box;
     }
 
     .latency-display {
@@ -225,7 +227,7 @@ export class App extends LitElement {
     }
 
     button {
-      padding: 0.75rem 1.5rem;
+      padding: 0.5rem 1.5rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
