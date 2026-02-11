@@ -207,6 +207,11 @@ export class App extends LitElement {
       align-items: center;
     }
 
+    .latency-display {
+      font-weight: normal;
+      color: #6b7280;
+    }
+
     .panel-content {
       flex: 1;
       overflow: auto;
@@ -374,7 +379,14 @@ export class App extends LitElement {
             hidden: !selectedMethod || selectedMethod.response.kind !== "ok",
           })}"
         >
-          <div class="panel-header">Response</div>
+          <div class="panel-header">
+            Response
+            ${selectedMethod && selectedMethod.response.kind === "ok"
+              ? html`<span class="latency-display"
+                  >${selectedMethod.response.latencyMillis}ms</span
+                >`
+              : ""}
+          </div>
           <div class="panel-content">
             <skir-studio-editor id="response-editor"></skir-studio-editor>
           </div>
