@@ -38,7 +38,7 @@ function createEditorState(
       enterKeyHandler(schema),
       basicSetup,
       json(),
-      linter(jsonLinter(schema)),
+      linter(jsonLinter(schema, editable)),
       autocompletion({
         override: [jsonCompletion(schema)],
       }),
