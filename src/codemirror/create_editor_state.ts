@@ -54,6 +54,42 @@ function createEditorState(
           backgroundImage:
             "repeating-linear-gradient(135deg, transparent 0, transparent 2px, rgba(100, 100, 100, 0.15) 2px, rgba(100, 100, 100, 0.15) 3px)",
         },
+        ".cm-lintRange-error": {
+          backgroundImage: "none",
+          borderBottom: "3px solid #dc2626",
+        },
+      }),
+      EditorView.baseTheme({
+        ".cm-tooltip-hover": {
+          backgroundColor: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "8px 12px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          fontSize: "13px",
+          lineHeight: "1.5",
+        },
+        ".cm-tooltip.cm-tooltip-lint": {
+          backgroundColor: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "8px 12px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        },
+        ".cm-tooltip-lint .cm-diagnostic": {
+          padding: "0",
+          borderTop: "none",
+          borderLeft: "none",
+        },
+        ".cm-tooltip-lint .cm-diagnostic-error": {
+          borderLeft: "none",
+          fontWeight: "bold",
+        },
+        ".cm-tooltip-lint .cm-diagnostic-info": {
+          borderLeft: "none",
+        },
       }),
     ],
   });

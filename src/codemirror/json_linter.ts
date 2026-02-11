@@ -31,6 +31,16 @@ function errorToDiagnostic(error: JsonError): Diagnostic {
     to: error.segment.end,
     message: error.message,
     severity: "error",
+    renderMessage: () => {
+      const wrapper = document.createElement("div");
+      wrapper.style.fontFamily =
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+      wrapper.style.fontSize = "13px";
+      wrapper.style.lineHeight = "1.5";
+      wrapper.style.padding = "4px";
+      wrapper.textContent = error.message;
+      return wrapper;
+    },
   };
 }
 
@@ -41,9 +51,14 @@ function typeHintToDiagnostic(typeHint: Hint): Diagnostic {
     message: typeHint.message,
     severity: "info",
     renderMessage: () => {
-      const dom = document.createElement("div");
-      dom.textContent = typeHint.message;
-      return dom;
+      const wrapper = document.createElement("div");
+      wrapper.style.fontFamily =
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+      wrapper.style.fontSize = "13px";
+      wrapper.style.lineHeight = "1.5";
+      wrapper.style.padding = "4px";
+      wrapper.textContent = typeHint.message;
+      return wrapper;
     },
     markClass: "",
   };

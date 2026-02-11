@@ -611,7 +611,9 @@ export class App extends LitElement {
         };
       }
 
+      const t0 = Date.now();
       const response = await fetch(fetchUrl, fetchOptions);
+      const latencyMillis = Math.max(Date.now() - t0, 0);
 
       if (!response.ok) {
         let errorMessage = `HTTP error ${response.status}`;
@@ -631,6 +633,7 @@ export class App extends LitElement {
         kind: "ok",
         response: data,
         editorState: respEditorState,
+        latencyMillis: latencyMillis,
       };
       // Render the response in the response editor
       responseEditor.state = respEditorState;
@@ -695,6 +698,7 @@ type ResponseState =
       kind: "ok";
       response: Json;
       editorState: EditorState;
+      latencyMillis: number;
     }
   | {
       kind: "error";
