@@ -102,8 +102,12 @@ export class App extends LitElement {
       gap: 1rem;
     }
 
-    .doc-badge {
+    .doc-badge-wrapper {
       position: relative;
+      display: inline-flex;
+    }
+
+    .doc-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -118,44 +122,57 @@ export class App extends LitElement {
       transition: all 0.2s ease;
     }
 
-    .doc-badge:hover {
+    .doc-badge-wrapper:hover .doc-badge {
       background: #764ba2;
       transform: scale(1.1);
     }
 
-    .doc-badge .tooltip {
+    .doc-badge-wrapper .tooltip {
       visibility: hidden;
       position: absolute;
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
       margin-top: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: #1f2937;
-      color: white;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
+      padding: 8px 12px;
+      background: white;
+      color: #333;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 13px;
       font-weight: 400;
+      line-height: 1.5;
       white-space: pre-wrap;
       min-width: 250px;
       max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 1000;
       opacity: 0;
       transition: opacity 0.2s ease, visibility 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
     }
 
-    .doc-badge .tooltip::after {
+    .doc-badge-wrapper .tooltip::before {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      height: 0.5rem;
+    }
+
+    .doc-badge-wrapper .tooltip::after {
       content: "";
       position: absolute;
       bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
-      border-bottom-color: #1f2937;
+      border-bottom-color: white;
     }
 
-    .doc-badge:hover .tooltip {
+    .doc-badge-wrapper:hover .tooltip {
       visibility: visible;
       opacity: 1;
     }
@@ -491,8 +508,8 @@ export class App extends LitElement {
         )}
       </select>
       ${this.selectedMethod?.method.doc
-        ? html`<div class="doc-badge">
-            ?
+        ? html`<div class="doc-badge-wrapper">
+            <div class="doc-badge">?</div>
             <div class="tooltip">${this.selectedMethod.method.doc}</div>
           </div>`
         : ""}
