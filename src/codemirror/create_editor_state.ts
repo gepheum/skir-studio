@@ -54,8 +54,8 @@ function createEditorState(
           height: "400px",
         },
         ".cm-lintRange-info": {
-          backgroundImage:
-            "repeating-linear-gradient(135deg, transparent 0, transparent 2px, rgba(100, 100, 100, 0.15) 2px, rgba(100, 100, 100, 0.15) 3px)",
+          backgroundColor: "#f6f6f6",
+          backgroundImage: "none",
         },
         ".cm-lintRange-error": {
           backgroundImage: "none",
