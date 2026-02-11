@@ -185,7 +185,7 @@ export class App extends LitElement {
     }
 
     select {
-      padding: 0.75rem 1rem;
+      padding: 0.5rem 1rem;
       border: 2px solid #e2e8f0;
       border-radius: 0.5rem;
       font-size: 0.875rem;
