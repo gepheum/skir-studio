@@ -70,6 +70,15 @@ function createEditorState(
         ".cm-lint-marker-info": {
           display: "none",
         },
+        ".cm-status-bar-link": {
+          textDecoration: "none",
+        },
+        ".cm-status-bar-link:hover": {
+          textDecoration: "underline",
+        },
+        ".cm-status-bar-link:hover ~ .cm-status-bar-link": {
+          textDecoration: "underline",
+        },
         ".cm-tooltip-hover": {
           backgroundColor: "white",
           border: "1px solid #e5e7eb",

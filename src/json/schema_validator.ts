@@ -12,6 +12,7 @@ import type {
   PrimitiveType,
   RecordDefinition,
   TypeDefinition,
+  TypeHint,
   TypeSignature,
   ValidationResult,
   VariantDefinition,
@@ -29,10 +30,18 @@ export function validateSchema(
   const validator = new SchemaValidator(idToRecordDef);
   const root: Path = { kind: "root" };
   validator.validate(value, root, schema.type);
+  const pathToTypeHint = new Map<Path, TypeHint>();
+  for (const hint of validator.hints) {
+    const { valueContext } = hint;
+    if (valueContext) {
+      pathToTypeHint.set(valueContext.path, hint);
+    }
+  }
   return {
     errors: validator.errors,
     hints: validator.hints,
-    rootTypeHint: validator.typeHintStack[0],
+    rootTypeHint: validator.rootTypeHint,
+    pathToTypeHint: pathToTypeHint,
   };
 }
 
@@ -62,11 +71,13 @@ class SchemaValidator {
   constructor(readonly idToRecordDef: { [id: string]: RecordDefinition }) {}
   readonly errors: JsonError[] = [];
   readonly hints: Hint[] = [];
-  readonly typeHintStack: MutableTypeHint[] = [];
+  private readonly typeHintStack: MutableTypeHint[] = [];
+  rootTypeHint: TypeHint | undefined;
 
   validate(value: JsonValue, path: Path, schema: TypeSignature): void {
     const { idToRecordDef, typeHintStack } = this;
     value.expectedType = schema;
+    // For every call to pushTypeHint() there emust be one call to typeHintStack.pop()
     const pushTypeHint = (): void => {
       const typeDesc = getTypeDesc(schema);
       const typeDoc = getTypeDoc(schema, idToRecordDef);
@@ -80,6 +91,8 @@ class SchemaValidator {
       if (typeHintStack.length) {
         const topOfStack = typeHintStack[typeHintStack.length - 1];
         topOfStack.childHints.push(hint);
+      } else {
+        this.rootTypeHint = hint;
       }
       this.hints.push(hint);
       typeHintStack.push(hint);

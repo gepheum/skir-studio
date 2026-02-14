@@ -199,6 +199,7 @@ export interface TypeHint {
   readonly segment: Segment;
   readonly message: string;
   readonly valueContext: JsonValueContext;
+  /// In order. All are included in 'valueContext.value.segment'.
   readonly childHints: readonly TypeHint[];
 }
 
@@ -217,5 +218,6 @@ export interface MutableTypeHint extends TypeHint {
 export interface ValidationResult {
   readonly errors: JsonError[];
   readonly hints: Hint[];
-  rootTypeHint: TypeHint | undefined;
+  readonly rootTypeHint: TypeHint | undefined;
+  readonly pathToTypeHint: ReadonlyMap<Path, TypeHint>;
 }
