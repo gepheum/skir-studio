@@ -13,6 +13,7 @@ export class Editor extends LitElement {
 
   override firstUpdated(): void {
     const container = this.renderRoot.querySelector("#container");
+
     this.editor = {
       kind: "view",
       value: new EditorView({
@@ -34,7 +35,7 @@ export class Editor extends LitElement {
     if (this.editor.kind === "state") {
       this.editor = {
         kind: "state",
-        value: this.editor.value,
+        value: value,
       };
     } else {
       this.editor.value.setState(value);

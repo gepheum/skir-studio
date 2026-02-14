@@ -9,6 +9,7 @@ import type { Json, RecordDefinition, TypeDefinition } from "../json/types";
 import { enterKeyHandler } from "./enter_key_handler";
 import { jsonCompletion } from "./json_completion";
 import { jsonLinter } from "./json_linter";
+import { statusBar } from "./status_bar";
 
 export function createReqEditorState(schema: TypeDefinition): EditorState {
   const idToRecordDef: { [id: string]: RecordDefinition } = {};
@@ -43,6 +44,7 @@ function createEditorState(
         override: [jsonCompletion(schema)],
       }),
       lintGutter(),
+      statusBar(),
       EditorView.theme({
         "&": {
           fontSize: "14px",
