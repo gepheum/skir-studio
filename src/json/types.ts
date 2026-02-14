@@ -12,14 +12,14 @@ export type Json =
 // -----------------------------------------------------------------------------
 
 export interface JsonError {
-  kind: "error";
-  segment: Segment;
-  message: string;
+  readonly kind: "error";
+  readonly segment: Segment;
+  readonly message: string;
 }
 
 export interface JsonErrors {
-  kind: "errors";
-  errors: JsonError[];
+  readonly kind: "errors";
+  readonly errors: JsonError[];
 }
 
 // -----------------------------------------------------------------------------
@@ -29,38 +29,69 @@ export interface JsonErrors {
 export type JsonValue = JsonArray | JsonObject | JsonLiteral;
 
 export interface JsonArray {
-  kind: "array";
-  segment: Segment;
-  values: JsonValue[];
+  readonly kind: "array";
+  readonly segment: Segment;
+  readonly values: JsonValue[];
   expectedType?: TypeSignature;
 }
 
 export interface JsonKeyValue {
   /// For the key.
-  segment: Segment;
-  key: string;
-  value: JsonValue;
+  readonly segment: Segment;
+  readonly key: string;
+  readonly value: JsonValue;
   expectedType?: TypeSignature;
 }
 
 export interface JsonObject {
-  kind: "object";
-  segment: Segment;
-  keyValues: { [key: string]: JsonKeyValue };
+  readonly kind: "object";
+  readonly segment: Segment;
+  readonly keyValues: { [key: string]: JsonKeyValue };
   expectedType?: TypeSignature;
 }
 
 export interface JsonLiteral {
-  kind: "literal";
-  segment: Segment;
-  jsonCode: string;
-  type: "boolean" | "null" | "number" | "string";
+  readonly kind: "literal";
+  readonly segment: Segment;
+  readonly jsonCode: string;
+  readonly type: "boolean" | "null" | "number" | "string";
   expectedType?: TypeSignature;
 }
 
 export interface Segment {
-  start: number;
-  end: number;
+  readonly start: number;
+  readonly end: number;
+}
+
+/// Path to a sub-value within a valid Skir value.
+export type Path =
+  | {
+      readonly kind: "root";
+    }
+  | {
+      readonly kind: "field-value";
+      /// Name of the field of the struct
+      readonly fieldName: string;
+      /// Path to the struct value
+      readonly structPath: Path;
+    }
+  | {
+      readonly kind: "variant-value";
+      /// Name of the wrapper variant of the enum
+      readonly variantName: string;
+      /// Path to the enum value
+      readonly enumPath: Path;
+    }
+  | {
+      readonly kind: "array-item";
+      readonly index: number;
+      readonly key: string | null;
+      readonly arrayPath: Path;
+    };
+
+export interface JsonValueContext {
+  readonly value: JsonValue;
+  readonly path: Path;
 }
 
 // -----------------------------------------------------------------------------
@@ -69,8 +100,8 @@ export interface Segment {
 
 /** JSON representation of a `TypeDescriptor`. */
 export type TypeDefinition = {
-  type: TypeSignature;
-  records: readonly RecordDefinition[];
+  readonly type: TypeSignature;
+  readonly records: readonly RecordDefinition[];
 };
 
 /** A type in the JSON representation of a `TypeDescriptor`. */
@@ -87,16 +118,16 @@ export type TypeSignature =
     };
 
 export interface ArrayTypeSignature {
-  kind: "array";
-  value: {
-    item: TypeSignature;
-    key_extractor?: string;
+  readonly kind: "array";
+  readonly value: {
+    readonly item: TypeSignature;
+    readonly key_extractor?: string;
   };
 }
 
 export interface RecordTypeSignature {
-  kind: "record";
-  value: string;
+  readonly kind: "record";
+  readonly value: string;
 }
 
 export type PrimitiveType =
@@ -114,11 +145,11 @@ export type RecordDefinition = StructDefinition | EnumDefinition;
 
 /** Definition of a struct in the JSON representation of a `TypeDescriptor`. */
 export type StructDefinition = {
-  kind: "struct";
-  id: string;
-  doc?: string;
-  fields: readonly FieldDefinition[];
-  removed_numbers?: readonly number[];
+  readonly kind: "struct";
+  readonly id: string;
+  readonly doc?: string;
+  readonly fields: readonly FieldDefinition[];
+  readonly removed_numbers?: readonly number[];
 };
 
 /**
@@ -126,19 +157,19 @@ export type StructDefinition = {
  * `TypeDescriptor`.
  */
 export type FieldDefinition = {
-  name: string;
-  type: TypeSignature;
-  number: number;
-  doc?: string;
+  readonly name: string;
+  readonly type: TypeSignature;
+  readonly number: number;
+  readonly doc?: string;
 };
 
 /** Definition of an enum in the JSON representation of a `TypeDescriptor`. */
 export type EnumDefinition = {
-  kind: "enum";
-  id: string;
-  doc?: string;
-  variants: readonly VariantDefinition[];
-  removed_numbers?: readonly number[];
+  readonly kind: "enum";
+  readonly id: string;
+  readonly doc?: string;
+  readonly variants: readonly VariantDefinition[];
+  readonly removed_numbers?: readonly number[];
 };
 
 /**
@@ -146,10 +177,10 @@ export type EnumDefinition = {
  * `TypeDescriptor`.
  */
 export type VariantDefinition = {
-  name: string;
-  type?: TypeSignature;
-  number: number;
-  doc?: string;
+  readonly name: string;
+  readonly type?: TypeSignature;
+  readonly number: number;
+  readonly doc?: string;
 };
 
 // -----------------------------------------------------------------------------
@@ -157,11 +188,12 @@ export type VariantDefinition = {
 // -----------------------------------------------------------------------------
 
 export interface Hint {
-  segment: Segment;
-  message: string;
+  readonly segment: Segment;
+  readonly message: string;
+  readonly valueContext?: JsonValueContext;
 }
 
 export interface ValidationResult {
-  errors: JsonError[];
-  hints: Hint[];
+  readonly errors: JsonError[];
+  readonly hints: Hint[];
 }

@@ -7,6 +7,7 @@ import type {
   JsonError,
   JsonObject,
   JsonValue,
+  Path,
   PrimitiveType,
   RecordDefinition,
   TypeDefinition,
@@ -25,7 +26,8 @@ export function validateSchema(
   }
 
   const validator = new SchemaValidator(idToRecordDef);
-  validator.validate(value, schema.type);
+  const root: Path = { kind: "root" };
+  validator.validate(value, root, schema.type);
   return {
     errors: validator.errors,
     hints: validator.hints,
@@ -59,7 +61,7 @@ class SchemaValidator {
   readonly errors: JsonError[] = [];
   readonly hints: Hint[] = [];
 
-  validate(value: JsonValue, schema: TypeSignature): void {
+  validate(value: JsonValue, path: Path, schema: TypeSignature): void {
     const { idToRecordDef } = this;
     value.expectedType = schema;
     const pushTypeHint = (): void => {
@@ -69,14 +71,24 @@ class SchemaValidator {
       void this.hints.push({
         segment: value.segment,
         message: message,
+        valueContext: { value, path },
       });
     };
     switch (schema.kind) {
       case "array": {
         if (value.kind === "array") {
           pushTypeHint();
-          for (const item of value.values) {
-            this.validate(item, schema.value.item);
+          for (const [index, item] of value.values.entries()) {
+            const { key_extractor: keyExtractor, item: itemSchema } =
+              schema.value;
+            const itemKey = extractItemKey(item, keyExtractor);
+            const itemPath: Path = {
+              kind: "array-item",
+              index: index,
+              key: itemKey,
+              arrayPath: path,
+            };
+            this.validate(item, itemPath, itemSchema);
           }
         } else {
           this.errors.push({
@@ -91,7 +103,7 @@ class SchemaValidator {
         if (value.kind === "literal" && value.jsonCode === "null") {
           pushTypeHint();
         } else {
-          this.validate(value, schema.value);
+          this.validate(value, path, schema.value);
         }
         break;
       }
@@ -128,7 +140,12 @@ class SchemaValidator {
                     message: fieldDef.doc,
                   });
                 }
-                this.validate(value, fieldDef.type!);
+                const valuePath: Path = {
+                  kind: "field-value",
+                  fieldName: key,
+                  structPath: path,
+                };
+                this.validate(value, valuePath, fieldDef.type!);
               } else {
                 this.errors.push({
                   kind: "error",
@@ -152,7 +169,7 @@ class SchemaValidator {
           });
           if (value.kind === "object") {
             pushTypeHint();
-            this.validateEnumObject(value, nameToVariantDef);
+            this.validateEnumObject(value, path, nameToVariantDef);
           } else if (value.kind === "literal" && value.type === "string") {
             const name = JSON.parse(value.jsonCode);
             const fieldDef = nameToVariantDef[name];
@@ -184,6 +201,7 @@ class SchemaValidator {
 
   validateEnumObject(
     object: JsonObject,
+    enumPath: Path,
     nameToVariantDef: { [name: string]: VariantDefinition },
   ): void {
     const kindKv = object.keyValues["kind"];
@@ -230,7 +248,60 @@ class SchemaValidator {
       });
       return;
     }
-    this.validate(valueKv.value, variantDef.type!);
+    const path: Path = {
+      kind: "variant-value",
+      variantName: variantDef.name,
+      enumPath: enumPath,
+    };
+    this.validate(valueKv.value, path, variantDef.type!);
+  }
+}
+
+function extractItemKey(
+  item: JsonValue,
+  keyExtractor: string | undefined,
+): string | null {
+  if (keyExtractor === undefined) {
+    return null;
+  }
+  const pieces = keyExtractor.split(".");
+  let value = item;
+  for (const piece of pieces) {
+    if (value.kind !== "object") {
+      // Error
+      return null;
+    }
+    const kv = value.keyValues[piece];
+    if (!kv) {
+      // Error
+      return null;
+    }
+    value = kv.value;
+  }
+  switch (item.kind) {
+    case "literal": {
+      switch (item.type) {
+        case "string":
+        case "number":
+        case "boolean":
+          return item.jsonCode;
+      }
+      // Error
+      return null;
+    }
+    case "object": {
+      const kv = item.keyValues["unix_millis"];
+      if (kv && kv.value.kind === "literal" && kv.value.type === "number") {
+        return kv.value.jsonCode;
+      } else {
+        // Error
+        return null;
+      }
+    }
+    case "array": {
+      // Error
+      return null;
+    }
   }
 }
 
