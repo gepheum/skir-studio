@@ -36,7 +36,7 @@ export function jsonCompletion(
           return null;
         }
         for (const element of jsonValue.values) {
-          if (position < element.segment.start) {
+          if (position < element.firstToken.start) {
             return null; // No need to continue (optimization)
           }
           const maybeResult = doCompleteJson(element, position);
@@ -54,14 +54,14 @@ export function jsonCompletion(
         if (recordDef.kind === "struct") {
           for (const keyValue of Object.values(jsonValue.keyValues)) {
             // First, see if the current position is within the key.
-            if (inSegment(position, keyValue.segment)) {
+            if (inSegment(position, keyValue.firstToken)) {
               const missingFieldNames = collectMissingFieldNames(
                 jsonValue,
                 recordDef,
               );
               return {
-                from: keyValue.segment.start + 1,
-                to: keyValue.segment.end - 1,
+                from: keyValue.firstToken.start + 1,
+                to: keyValue.firstToken.end - 1,
                 options: missingFieldNames.map((name) => ({
                   label: name,
                 })),
@@ -77,7 +77,7 @@ export function jsonCompletion(
           const kindKv = jsonValue.keyValues["kind"];
           if (
             kindKv &&
-            inSegment(position, kindKv.value.segment) &&
+            inSegment(position, kindKv.value.firstToken) &&
             kindKv.value.kind === "literal" &&
             kindKv.value.type === "string"
           ) {
@@ -87,8 +87,8 @@ export function jsonCompletion(
                 label: v.name,
               }));
             return {
-              from: kindKv.value.segment.start + 1,
-              to: kindKv.value.segment.end - 1,
+              from: kindKv.value.firstToken.start + 1,
+              to: kindKv.value.firstToken.end - 1,
               options: options,
             };
           }
@@ -103,7 +103,7 @@ export function jsonCompletion(
         return null;
       }
       case "literal": {
-        if (!inSegment(position, jsonValue.segment)) {
+        if (!inSegment(position, jsonValue.firstToken)) {
           return null;
         }
         if (expectedType.kind !== "record") {
@@ -122,8 +122,8 @@ export function jsonCompletion(
             label: "UNKNOWN",
           });
         return {
-          from: jsonValue.segment.start + 1,
-          to: jsonValue.segment.end - 1,
+          from: jsonValue.firstToken.start + 1,
+          to: jsonValue.firstToken.end - 1,
           options: options,
         };
       }

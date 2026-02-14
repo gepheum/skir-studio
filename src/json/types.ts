@@ -30,14 +30,14 @@ export type JsonValue = JsonArray | JsonObject | JsonLiteral;
 
 export interface JsonArray {
   readonly kind: "array";
-  readonly segment: Segment;
+  readonly firstToken: Segment;
   readonly values: JsonValue[];
   expectedType?: TypeSignature;
 }
 
 export interface JsonKeyValue {
   /// For the key.
-  readonly segment: Segment;
+  readonly firstToken: Segment;
   readonly key: string;
   readonly value: JsonValue;
   expectedType?: TypeSignature;
@@ -45,14 +45,14 @@ export interface JsonKeyValue {
 
 export interface JsonObject {
   readonly kind: "object";
-  readonly segment: Segment;
+  readonly firstToken: Segment;
   readonly keyValues: { [key: string]: JsonKeyValue };
   expectedType?: TypeSignature;
 }
 
 export interface JsonLiteral {
   readonly kind: "literal";
-  readonly segment: Segment;
+  readonly firstToken: Segment;
   readonly jsonCode: string;
   readonly type: "boolean" | "null" | "number" | "string";
   expectedType?: TypeSignature;

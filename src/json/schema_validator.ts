@@ -69,7 +69,7 @@ class SchemaValidator {
       const typeDoc = getTypeDoc(schema, idToRecordDef);
       const message = typeDoc ? `${typeDesc}\n\n${typeDoc}` : typeDesc;
       void this.hints.push({
-        segment: value.segment,
+        segment: value.firstToken,
         message: message,
         valueContext: { value, path },
       });
@@ -93,7 +93,7 @@ class SchemaValidator {
         } else {
           this.errors.push({
             kind: "error",
-            segment: value.segment,
+            segment: value.firstToken,
             message: "Expected: array",
           });
         }
@@ -114,7 +114,7 @@ class SchemaValidator {
         } else {
           this.errors.push({
             kind: "error",
-            segment: value.segment,
+            segment: value.firstToken,
             message: `Expected: ${primitiveType}`,
           });
         }
@@ -136,7 +136,7 @@ class SchemaValidator {
               if (fieldDef) {
                 if (fieldDef.doc) {
                   this.hints.push({
-                    segment: keyValue.segment,
+                    segment: keyValue.firstToken,
                     message: fieldDef.doc,
                   });
                 }
@@ -149,7 +149,7 @@ class SchemaValidator {
               } else {
                 this.errors.push({
                   kind: "error",
-                  segment: keyValue.segment,
+                  segment: keyValue.firstToken,
                   message: "Unknown field",
                 });
               }
@@ -157,7 +157,7 @@ class SchemaValidator {
           } else {
             this.errors.push({
               kind: "error",
-              segment: value.segment,
+              segment: value.firstToken,
               message: "Expected: object",
             });
           }
@@ -178,14 +178,14 @@ class SchemaValidator {
             } else {
               this.errors.push({
                 kind: "error",
-                segment: value.segment,
+                segment: value.firstToken,
                 message: "Unknown enumerator",
               });
             }
           } else {
             this.errors.push({
               kind: "error",
-              segment: value.segment,
+              segment: value.firstToken,
               message: "Expected: object or string",
             });
           }
@@ -208,7 +208,7 @@ class SchemaValidator {
     if (!kindKv) {
       this.errors.push({
         kind: "error",
-        segment: object.segment,
+        segment: object.firstToken,
         message: "Missing: 'kind'",
       });
       return;
@@ -216,7 +216,7 @@ class SchemaValidator {
     if (kindKv.value.kind !== "literal" || kindKv.value.type !== "string") {
       this.errors.push({
         kind: "error",
-        segment: kindKv.value.segment,
+        segment: kindKv.value.firstToken,
         message: "Expected: string",
       });
       return;
@@ -225,7 +225,7 @@ class SchemaValidator {
     if (kind !== kind.toLowerCase()) {
       this.errors.push({
         kind: "error",
-        segment: kindKv.value.segment,
+        segment: kindKv.value.firstToken,
         message: "Expected: lowercase enumerator",
       });
       return;
@@ -234,7 +234,7 @@ class SchemaValidator {
     if (!variantDef) {
       this.errors.push({
         kind: "error",
-        segment: kindKv.value.segment,
+        segment: kindKv.value.firstToken,
         message: "Unknown enumerator",
       });
       return;
@@ -243,7 +243,7 @@ class SchemaValidator {
     if (!valueKv) {
       this.errors.push({
         kind: "error",
-        segment: object.segment,
+        segment: object.firstToken,
         message: "Missing: 'value'",
       });
       return;

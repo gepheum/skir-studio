@@ -130,13 +130,13 @@ function findTypeByLeftBracketPos(
       if (expectedType.kind !== "array") {
         return null;
       }
-      if (leftBracketPos === jsonValue.segment.start) {
+      if (leftBracketPos === jsonValue.firstToken.start) {
         // We have a match
         return expectedType;
       }
       // If no match, we can continue searching in the elements.
       for (const element of jsonValue.values) {
-        if (leftBracketPos < element.segment.start) {
+        if (leftBracketPos < element.firstToken.start) {
           return null; // No need to continue (optimization)
         }
         const maybeResult = findTypeByLeftBracketPos(
@@ -154,7 +154,7 @@ function findTypeByLeftBracketPos(
       if (expectedType.kind !== "record") {
         return null;
       }
-      if (leftBracketPos === jsonValue.segment.start) {
+      if (leftBracketPos === jsonValue.firstToken.start) {
         // We have a match
         return expectedType;
       }

@@ -104,7 +104,7 @@ class JsonParser {
         this.nextToken();
         return {
           kind: "literal",
-          segment: token.segment,
+          firstToken: token.segment,
           jsonCode: "null",
           type: "null",
         };
@@ -112,7 +112,7 @@ class JsonParser {
         this.nextToken();
         return {
           kind: "literal",
-          segment: token.segment,
+          firstToken: token.segment,
           jsonCode: "false",
           type: "boolean",
         };
@@ -120,7 +120,7 @@ class JsonParser {
         this.nextToken();
         return {
           kind: "literal",
-          segment: token.segment,
+          firstToken: token.segment,
           jsonCode: "true",
           type: "boolean",
         };
@@ -128,7 +128,7 @@ class JsonParser {
         this.nextToken();
         return {
           kind: "literal",
-          segment: token.segment,
+          firstToken: token.segment,
           jsonCode: token.jsonCode,
           type: "string",
         };
@@ -146,7 +146,7 @@ class JsonParser {
         this.nextToken();
         return {
           kind: "literal",
-          segment: token.segment,
+          firstToken: token.segment,
           jsonCode: token.jsonCode,
           type: "number",
         };
@@ -165,7 +165,7 @@ class JsonParser {
     const leftBracket = this.nextToken();
     const result: JsonArray = {
       kind: "array",
-      segment: leftBracket.segment,
+      firstToken: leftBracket.segment,
       values: [],
     };
     let expectComma = false;
@@ -202,7 +202,7 @@ class JsonParser {
     const leftBracket = this.nextToken();
     const result: JsonObject = {
       kind: "object",
-      segment: leftBracket.segment,
+      firstToken: leftBracket.segment,
       keyValues: {},
     };
     let expectComma = false;
@@ -253,7 +253,7 @@ class JsonParser {
       const value = this.parseValueOrSkip();
       if (value) {
         result.keyValues[key] = {
-          segment: keyToken.segment,
+          firstToken: keyToken.segment,
           key: key,
           value: value,
         };
