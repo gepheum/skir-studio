@@ -46,7 +46,7 @@ export function statusBar(): ReturnType<typeof showPanel.of> {
 function findTypeHint(pos: number, root: TypeHint): TypeHint | undefined {
   // Check if pos is within the root's segment
   const segment = root.valueContext.value.segment;
-  if (pos < segment.start || pos >= segment.end) {
+  if (pos < segment.start || pos > segment.end) {
     return undefined;
   }
 
@@ -62,7 +62,7 @@ function findTypeHint(pos: number, root: TypeHint): TypeHint | undefined {
 
     if (pos < childSegment.start) {
       right = mid - 1;
-    } else if (pos >= childSegment.end) {
+    } else if (pos > childSegment.end) {
       left = mid + 1;
     } else {
       // pos is within this child's segment
