@@ -70,14 +70,60 @@ function createEditorState(
         ".cm-lint-marker-info": {
           display: "none",
         },
+        ".cm-status-bar": {
+          display: "flex",
+          flexDirection: "row-reverse",
+          justifyContent: "flex-end",
+          padding: "4px 12px",
+          backgroundColor: "#f3f4f6",
+          borderTop: "1px solid #e5e7eb",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontSize: "12px",
+          color: "#6b7280",
+          height: "16px",
+        },
         ".cm-status-bar-link": {
           textDecoration: "none",
+          cursor: "pointer",
         },
         ".cm-status-bar-link:hover": {
           textDecoration: "underline",
         },
         ".cm-status-bar-link:hover ~ .cm-status-bar-link": {
           textDecoration: "underline",
+        },
+        ".cm-diagnostic-wrapper": {
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          fontSize: "13px",
+          lineHeight: "1.5",
+          padding: "4px",
+        },
+        ".cm-diagnostic-controls": {
+          marginTop: "8px",
+          display: "flex",
+          gap: "8px",
+          alignItems: "center",
+        },
+        ".cm-diagnostic-label": {
+          whiteSpace: "nowrap",
+          fontWeight: "500",
+        },
+        ".cm-diagnostic-textarea": {
+          flex: "1",
+          padding: "4px 8px",
+          border: "1px solid #e5e7eb",
+          borderRadius: "4px",
+          fontSize: "13px",
+          fontFamily: "'JetBrains Mono', monospace",
+          resize: "none",
+          overflow: "auto",
+          boxSizing: "border-box",
+        },
+        ".cm-diagnostic-textarea[readonly]": {
+          backgroundColor: "#f9fafb",
+          cursor: "default",
         },
         ".cm-tooltip-hover": {
           backgroundColor: "white",

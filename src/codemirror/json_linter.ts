@@ -38,11 +38,7 @@ function errorToDiagnostic(error: JsonError): Diagnostic {
     severity: "error",
     renderMessage: (): Node => {
       const wrapper = document.createElement("div");
-      wrapper.style.fontFamily =
-        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-      wrapper.style.fontSize = "13px";
-      wrapper.style.lineHeight = "1.5";
-      wrapper.style.padding = "4px";
+      wrapper.className = "cm-diagnostic-wrapper";
       wrapper.textContent = error.message;
       return wrapper;
     },
@@ -60,11 +56,7 @@ function typeHintToDiagnostic(
     severity: "info",
     renderMessage: (view): Node => {
       const wrapper = document.createElement("div");
-      wrapper.style.fontFamily =
-        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-      wrapper.style.fontSize = "13px";
-      wrapper.style.lineHeight = "1.5";
-      wrapper.style.padding = "4px";
+      wrapper.className = "cm-diagnostic-wrapper";
 
       // If the message is "string", add an editable text box with the parsed value
       if (typeHint.message === "string") {
@@ -77,34 +69,18 @@ function typeHintToDiagnostic(
         const parsedValue = JSON.parse(jsonString) as string;
 
         const controlsDiv = document.createElement("div");
-        controlsDiv.style.marginTop = "8px";
-        controlsDiv.style.display = "flex";
-        controlsDiv.style.gap = "8px";
-        controlsDiv.style.alignItems = "center";
+        controlsDiv.className = "cm-diagnostic-controls";
 
         const label = document.createElement("span");
+        label.className = "cm-diagnostic-label";
         label.textContent = "Value:";
-        label.style.whiteSpace = "nowrap";
-        label.style.fontWeight = "500";
 
         const textarea = document.createElement("textarea");
+        textarea.className = "cm-diagnostic-textarea";
         textarea.value = parsedValue;
         textarea.rows = 1;
         const isReadOnly = editable === "read-only";
         textarea.readOnly = isReadOnly;
-        textarea.style.flex = "1";
-        textarea.style.padding = "4px 8px";
-        textarea.style.border = "1px solid #e5e7eb";
-        textarea.style.borderRadius = "4px";
-        textarea.style.fontSize = "13px";
-        textarea.style.fontFamily = "'JetBrains Mono', monospace";
-        textarea.style.resize = "none";
-        textarea.style.overflow = "auto";
-        textarea.style.boxSizing = "border-box";
-        if (isReadOnly) {
-          textarea.style.backgroundColor = "#f9fafb";
-          textarea.style.cursor = "default";
-        }
 
         textarea.addEventListener("keydown", (e) => {
           if (e.key === "Enter" && !e.shiftKey && !isReadOnly) {
