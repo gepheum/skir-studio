@@ -1,19 +1,26 @@
 import { StateEffect, StateField } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { parseJsonValue } from "../json/json_parser";
-import type { JsonErrors, JsonValue } from "../json/types";
+import { validateSchema } from "../json/schema_validator";
+import type {
+  JsonErrors,
+  JsonValue,
+  TypeDefinition,
+  ValidationResult,
+} from "../json/types";
 
 export interface JsonState {
   parseResult: JsonValue | JsonErrors;
+  validationResult?: ValidationResult;
 }
 
 const updateJsonState = StateEffect.define<JsonState>();
 
 export const jsonStateField = StateField.define<JsonState | null>({
-  create() {
+  create(): JsonState | null {
     return null;
   },
-  update(value, tr) {
+  update(value, tr): JsonState | null {
     for (const effect of tr.effects) {
       if (effect.is(updateJsonState)) {
         return effect.value;
@@ -23,7 +30,7 @@ export const jsonStateField = StateField.define<JsonState | null>({
   },
 });
 
-export function debouncedJsonParser() {
+export function debouncedJsonParser(schema: TypeDefinition) {
   return [
     jsonStateField,
     ViewPlugin.fromClass(
@@ -36,13 +43,13 @@ export function debouncedJsonParser() {
           this.scheduleUpdate();
         }
 
-        update(update: ViewUpdate) {
+        update(update: ViewUpdate): void {
           if (update.docChanged) {
             this.scheduleUpdate();
           }
         }
 
-        scheduleUpdate() {
+        scheduleUpdate(): void {
           if (this.timeout !== null) {
             clearTimeout(this.timeout);
           }
@@ -52,15 +59,21 @@ export function debouncedJsonParser() {
           }, 200);
         }
 
-        parseJson() {
+        parseJson(): void {
           const jsonCode = this.view.state.doc.toString();
           const parseResult = parseJsonValue(jsonCode);
+
+          let validationResult;
+          if (parseResult.kind !== "errors") {
+            validationResult = validateSchema(parseResult, schema);
+          }
+
           this.view.dispatch({
-            effects: updateJsonState.of({ parseResult }),
+            effects: updateJsonState.of({ parseResult, validationResult }),
           });
         }
 
-        destroy() {
+        destroy(): void {
           if (this.timeout !== null) {
             clearTimeout(this.timeout);
           }

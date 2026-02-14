@@ -13,7 +13,7 @@ function createStatusBarPanel(view: EditorView): Panel {
   dom.style.fontSize = "12px";
   dom.style.color = "#6b7280";
 
-  function updateCursor() {
+  function updateCursor(): void {
     const pos = view.state.selection.main.head;
     const line = view.state.doc.lineAt(pos);
     const lineNumber = line.number;
@@ -25,7 +25,7 @@ function createStatusBarPanel(view: EditorView): Panel {
 
   return {
     dom,
-    update(update) {
+    update(update): void {
       if (update.selectionSet) {
         updateCursor();
       }
@@ -34,6 +34,6 @@ function createStatusBarPanel(view: EditorView): Panel {
   };
 }
 
-export function statusBar() {
+export function statusBar(): ReturnType<typeof showPanel.of> {
   return showPanel.of(createStatusBarPanel);
 }
