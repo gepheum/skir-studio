@@ -72,10 +72,15 @@ function tokenize(input: string): JsonTokens | JsonError {
         };
       }
     } else {
+      // Find the next word boundary using unicode support
+      const wordBoundaryRegex = /\w*/uy;
+      wordBoundaryRegex.lastIndex = pos + 1;
+      wordBoundaryRegex.exec(input);
+      const end = wordBoundaryRegex.lastIndex || pos + 1;
       return {
         kind: "error",
         message: "not a token",
-        segment: { start: pos, end: pos },
+        segment: { start: pos, end: end },
       };
     }
   }
