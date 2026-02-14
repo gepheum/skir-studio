@@ -2,6 +2,7 @@ import type {
   JsonArray,
   JsonError,
   JsonErrors,
+  JsonKeyValue,
   JsonObject,
   JsonValue,
   Segment,
@@ -105,6 +106,7 @@ class JsonParser {
         return {
           kind: "literal",
           firstToken: token.segment,
+          segment: token.segment,
           jsonCode: "null",
           type: "null",
         };
@@ -113,6 +115,7 @@ class JsonParser {
         return {
           kind: "literal",
           firstToken: token.segment,
+          segment: token.segment,
           jsonCode: "false",
           type: "boolean",
         };
@@ -121,6 +124,7 @@ class JsonParser {
         return {
           kind: "literal",
           firstToken: token.segment,
+          segment: token.segment,
           jsonCode: "true",
           type: "boolean",
         };
@@ -129,6 +133,7 @@ class JsonParser {
         return {
           kind: "literal",
           firstToken: token.segment,
+          segment: token.segment,
           jsonCode: token.jsonCode,
           type: "string",
         };
@@ -147,6 +152,7 @@ class JsonParser {
         return {
           kind: "literal",
           firstToken: token.segment,
+          segment: token.segment,
           jsonCode: token.jsonCode,
           type: "number",
         };
@@ -163,16 +169,20 @@ class JsonParser {
 
   private parseArray(): JsonArray {
     const leftBracket = this.nextToken();
-    const result: JsonArray = {
-      kind: "array",
-      firstToken: leftBracket.segment,
-      values: [],
-    };
+    const values: JsonValue[] = [];
     let expectComma = false;
     while (true) {
       if (this.peekToken().jsonCode === "]") {
-        this.nextToken();
-        return result;
+        const rightBracket = this.nextToken();
+        return {
+          kind: "array",
+          firstToken: leftBracket.segment,
+          segment: {
+            start: leftBracket.segment.start,
+            end: rightBracket.segment.end,
+          },
+          values,
+        };
       }
       if (this.peekToken().jsonCode === "}") {
         this.errors.push({
@@ -180,12 +190,29 @@ class JsonParser {
           message: "expected: ']'",
           segment: this.peekToken().segment,
         });
-        this.nextToken();
-        return result;
+        const wrongBracket = this.nextToken();
+        return {
+          kind: "array",
+          firstToken: leftBracket.segment,
+          segment: {
+            start: leftBracket.segment.start,
+            end: wrongBracket.segment.end,
+          },
+          values,
+        };
       }
       if (this.peekToken().jsonCode === "") {
+        // End of file
         this.expectSymbolOrSkip("]");
-        return result;
+        return {
+          kind: "array",
+          firstToken: leftBracket.segment,
+          segment: {
+            start: leftBracket.segment.start,
+            end: this.peekToken().segment.start,
+          },
+          values,
+        };
       }
       if (expectComma && !this.expectSymbolOrSkip(",")) {
         continue;
@@ -193,23 +220,27 @@ class JsonParser {
       expectComma = true;
       const value = this.parseValueOrSkip();
       if (value) {
-        result.values.push(value);
+        values.push(value);
       }
     }
   }
 
   private parseObject(): JsonObject {
     const leftBracket = this.nextToken();
-    const result: JsonObject = {
-      kind: "object",
-      firstToken: leftBracket.segment,
-      keyValues: {},
-    };
+    const keyValues: { [key: string]: JsonKeyValue } = {};
     let expectComma = false;
     while (true) {
       if (this.peekToken().jsonCode === "}") {
-        this.nextToken();
-        return result;
+        const rightBracket = this.nextToken();
+        return {
+          kind: "object",
+          firstToken: leftBracket.segment,
+          segment: {
+            start: leftBracket.segment.start,
+            end: rightBracket.segment.end,
+          },
+          keyValues,
+        };
       }
       if (this.peekToken().jsonCode === "]") {
         this.errors.push({
@@ -217,12 +248,29 @@ class JsonParser {
           message: "expected: ']'",
           segment: this.peekToken().segment,
         });
-        this.nextToken();
-        return result;
+        const wrongBracket = this.nextToken();
+        return {
+          kind: "object",
+          firstToken: leftBracket.segment,
+          segment: {
+            start: leftBracket.segment.start,
+            end: wrongBracket.segment.end,
+          },
+          keyValues,
+        };
       }
       if (this.peekToken().jsonCode === "") {
+        // End of file
         this.expectSymbolOrSkip("}");
-        return result;
+        return {
+          kind: "object",
+          firstToken: leftBracket.segment,
+          segment: {
+            start: leftBracket.segment.start,
+            end: this.peekToken().segment.start,
+          },
+          keyValues,
+        };
       }
       if (expectComma && !this.expectSymbolOrSkip(",")) {
         continue;
@@ -243,7 +291,7 @@ class JsonParser {
         continue;
       }
       const key = JSON.parse(keyToken.jsonCode) as string;
-      if (result.keyValues[key]) {
+      if (keyValues[key]) {
         this.errors.push({
           kind: "error",
           message: "duplicate key",
@@ -252,7 +300,7 @@ class JsonParser {
       }
       const value = this.parseValueOrSkip();
       if (value) {
-        result.keyValues[key] = {
+        keyValues[key] = {
           firstToken: keyToken.segment,
           key: key,
           value: value,
