@@ -9,6 +9,7 @@ import type { Json, RecordDefinition, TypeDefinition } from "../json/types";
 import { enterKeyHandler } from "./enter_key_handler";
 import { jsonCompletion } from "./json_completion";
 import { jsonLinter } from "./json_linter";
+import { debouncedJsonParser } from "./json_state";
 import { statusBar } from "./status_bar";
 
 export function createReqEditorState(schema: TypeDefinition): EditorState {
@@ -39,6 +40,7 @@ function createEditorState(
       enterKeyHandler(schema),
       basicSetup,
       json(),
+      debouncedJsonParser(),
       linter(jsonLinter(schema, editable)),
       autocompletion({
         override: [jsonCompletion(schema)],

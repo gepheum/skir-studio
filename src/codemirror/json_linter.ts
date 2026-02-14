@@ -1,17 +1,20 @@
 import { Diagnostic } from "@codemirror/lint";
 import { EditorView } from "@codemirror/view";
-import { parseJsonValue } from "../json/json_parser";
 import { validateSchema } from "../json/schema_validator";
 import { Hint, JsonError, TypeDefinition } from "../json/types";
+import { jsonStateField } from "./json_state";
 
 export function jsonLinter(
   schema: TypeDefinition,
   editable: "editable" | "read-only",
 ): (view: EditorView) => Diagnostic[] {
   function lintJson(view: EditorView): Diagnostic[] {
-    const jsonCode = view.state.doc.toString();
+    const jsonState = view.state.field(jsonStateField, false);
+    if (!jsonState) {
+      return [];
+    }
 
-    const parseResult = parseJsonValue(jsonCode);
+    const parseResult = jsonState.parseResult;
     if (parseResult.kind === "errors") {
       return parseResult.errors.map(errorToDiagnostic);
     }
