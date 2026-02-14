@@ -5,7 +5,16 @@ import { customElement } from "lit/decorators.js";
 
 @customElement("skir-studio-editor")
 export class Editor extends LitElement {
-  static override styles = css``;
+  static override styles = css`
+    :host {
+      display: block;
+      height: 100%;
+    }
+
+    #container {
+      height: 100%;
+    }
+  `;
 
   override render(): TemplateResult {
     return html`<div id="container"></div>`;

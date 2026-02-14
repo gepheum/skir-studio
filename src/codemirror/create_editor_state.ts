@@ -50,12 +50,11 @@ function createEditorState(
       EditorView.theme({
         "&": {
           fontSize: "14px",
+          height: "100%",
         },
         ".cm-scroller": {
           fontFamily: "'JetBrains Mono', monospace",
-        },
-        ".cm-editor": {
-          height: "400px",
+          overflow: "auto",
         },
         ".cm-lintRange-info": {
           backgroundColor: "#f6f6f6",
