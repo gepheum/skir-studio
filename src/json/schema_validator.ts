@@ -7,6 +7,7 @@ import type {
   JsonError,
   JsonObject,
   JsonValue,
+  MutableTypeHint,
   Path,
   PrimitiveType,
   RecordDefinition,
@@ -31,6 +32,7 @@ export function validateSchema(
   return {
     errors: validator.errors,
     hints: validator.hints,
+    rootTypeHint: validator.typeHintStack[0],
   };
 }
 
@@ -60,19 +62,27 @@ class SchemaValidator {
   constructor(readonly idToRecordDef: { [id: string]: RecordDefinition }) {}
   readonly errors: JsonError[] = [];
   readonly hints: Hint[] = [];
+  readonly typeHintStack: MutableTypeHint[] = [];
 
   validate(value: JsonValue, path: Path, schema: TypeSignature): void {
-    const { idToRecordDef } = this;
+    const { idToRecordDef, typeHintStack } = this;
     value.expectedType = schema;
     const pushTypeHint = (): void => {
       const typeDesc = getTypeDesc(schema);
       const typeDoc = getTypeDoc(schema, idToRecordDef);
       const message = typeDoc ? `${typeDesc}\n\n${typeDoc}` : typeDesc;
-      void this.hints.push({
+      const hint: MutableTypeHint = {
         segment: value.firstToken,
         message: message,
         valueContext: { value, path },
-      });
+        childHints: [],
+      };
+      if (typeHintStack.length) {
+        const topOfStack = typeHintStack[typeHintStack.length - 1];
+        topOfStack.childHints.push(hint);
+      }
+      this.hints.push(hint);
+      typeHintStack.push(hint);
     };
     switch (schema.kind) {
       case "array": {
@@ -90,10 +100,11 @@ class SchemaValidator {
             };
             this.validate(item, itemPath, itemSchema);
           }
+          typeHintStack.pop();
         } else {
           this.errors.push({
             kind: "error",
-            segment: value.firstToken,
+            segment: value.segment,
             message: "Expected: array",
           });
         }
@@ -102,6 +113,7 @@ class SchemaValidator {
       case "optional": {
         if (value.kind === "literal" && value.jsonCode === "null") {
           pushTypeHint();
+          typeHintStack.pop();
         } else {
           this.validate(value, path, schema.value);
         }
@@ -111,6 +123,7 @@ class SchemaValidator {
         const primitiveType = schema.value;
         if (hasPrimitiveType(value, primitiveType)) {
           pushTypeHint();
+          typeHintStack.pop();
         } else {
           this.errors.push({
             kind: "error",
@@ -129,7 +142,6 @@ class SchemaValidator {
           });
           if (value.kind === "object") {
             pushTypeHint();
-
             for (const keyValue of Object.values(value.keyValues)) {
               const { key, value } = keyValue;
               const fieldDef = nameToFieldDef[key];
@@ -154,6 +166,7 @@ class SchemaValidator {
                 });
               }
             }
+            typeHintStack.pop();
           } else {
             this.errors.push({
               kind: "error",
@@ -170,15 +183,17 @@ class SchemaValidator {
           if (value.kind === "object") {
             pushTypeHint();
             this.validateEnumObject(value, path, nameToVariantDef);
+            typeHintStack.pop();
           } else if (value.kind === "literal" && value.type === "string") {
             const name = JSON.parse(value.jsonCode);
             const fieldDef = nameToVariantDef[name];
             if (name === "UNKNOWN" || fieldDef) {
               pushTypeHint();
+              typeHintStack.pop();
             } else {
               this.errors.push({
                 kind: "error",
-                segment: value.firstToken,
+                segment: value.segment,
                 message: "Unknown enumerator",
               });
             }
@@ -208,7 +223,7 @@ class SchemaValidator {
     if (!kindKv) {
       this.errors.push({
         kind: "error",
-        segment: object.firstToken,
+        segment: object.segment,
         message: "Missing: 'kind'",
       });
       return;
@@ -225,7 +240,7 @@ class SchemaValidator {
     if (kind !== kind.toLowerCase()) {
       this.errors.push({
         kind: "error",
-        segment: kindKv.value.firstToken,
+        segment: kindKv.value.segment,
         message: "Expected: lowercase enumerator",
       });
       return;
@@ -234,7 +249,7 @@ class SchemaValidator {
     if (!variantDef) {
       this.errors.push({
         kind: "error",
-        segment: kindKv.value.firstToken,
+        segment: kindKv.value.segment,
         message: "Unknown enumerator",
       });
       return;
@@ -243,7 +258,7 @@ class SchemaValidator {
     if (!valueKv) {
       this.errors.push({
         kind: "error",
-        segment: object.firstToken,
+        segment: object.segment,
         message: "Missing: 'value'",
       });
       return;
