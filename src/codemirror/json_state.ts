@@ -29,6 +29,36 @@ export const jsonStateField = StateField.define<JsonState | null>({
   },
 });
 
+/**
+ * Ensures the JSON state is up-to-date with the current document.
+ * If the state is stale or missing, triggers an immediate parse and returns the updated state.
+ */
+export function ensureJsonState(
+  view: EditorView,
+  schema: TypeDefinition,
+): JsonState {
+  const currentState = view.state.field(jsonStateField, false);
+  const jsonCode = view.state.doc.toString();
+
+  // Parse and validate immediately
+  const parseResult = parseJsonValue(jsonCode);
+  let validationResult;
+  if (parseResult.value) {
+    validationResult = validateSchema(parseResult.value, schema);
+  }
+
+  const newState: JsonState = { parseResult, validationResult };
+
+  // Update the state if it's different
+  if (!currentState || currentState !== newState) {
+    view.dispatch({
+      effects: updateJsonState.of(newState),
+    });
+  }
+
+  return newState;
+}
+
 export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
   return [
     jsonStateField,

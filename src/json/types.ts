@@ -39,6 +39,11 @@ export interface JsonArray {
   expectedType?: TypeSignature;
 }
 
+export interface JsonKey {
+  readonly keySegment: Segment;
+  readonly key: string;
+}
+
 export interface JsonKeyValue {
   readonly keySegment: Segment;
   readonly key: string;
@@ -54,8 +59,7 @@ export interface JsonObject {
   readonly segment: Segment;
   readonly keyValues: { [key: string]: JsonKeyValue };
   /// Includes "broken" keys which produced a parsing error.
-  /// All guaranteed to be string literals.
-  readonly allKeys: readonly Segment[];
+  readonly allKeys: readonly JsonKey[];
   expectedType?: TypeSignature;
 }
 

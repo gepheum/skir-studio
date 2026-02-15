@@ -7,7 +7,7 @@ import {
   StructDefinition,
   TypeDefinition,
 } from "../json/types";
-import { jsonStateField } from "./json_state";
+import { ensureJsonState } from "./json_state";
 
 export function jsonCompletion(
   schema: TypeDefinition,
@@ -22,6 +22,9 @@ export function jsonCompletion(
     jsonValue: JsonValue,
     position: number,
   ): CompletionResult | null {
+    if (!inSegment(position, jsonValue.segment)) {
+      return null;
+    }
     const { expectedType } = jsonValue;
     if (!expectedType) {
       return null;
@@ -51,25 +54,29 @@ export function jsonCompletion(
         }
         const recordDef = idToRecordDef[expectedType.value];
         if (recordDef.kind === "struct") {
-          for (const keyValue of Object.values(jsonValue.keyValues)) {
+          for (const key of jsonValue.allKeys) {
             // First, see if the current position is within the key.
-            if (inSegment(position, keyValue.keySegment)) {
+            const { keySegment } = key;
+            if (inSegment(position, keySegment)) {
               const missingFieldNames = collectMissingFieldNames(
                 jsonValue,
                 recordDef,
               );
               return {
-                from: keyValue.keySegment.start + 1,
-                to: keyValue.keySegment.end - 1,
+                from: keySegment.start + 1,
+                to: keySegment.end - 1,
                 options: missingFieldNames.map((name) => ({
                   label: name,
                 })),
               };
             }
             // Then, check the value.
-            const maybeResult = doCompleteJson(keyValue.value, position);
-            if (maybeResult) {
-              return maybeResult;
+            const keyValue = jsonValue.keyValues[key.key];
+            if (keyValue) {
+              const maybeResult = doCompleteJson(keyValue.value, position);
+              if (maybeResult) {
+                return maybeResult;
+              }
             }
           }
         } else {
@@ -102,9 +109,6 @@ export function jsonCompletion(
         return null;
       }
       case "literal": {
-        if (!inSegment(position, jsonValue.firstToken)) {
-          return null;
-        }
         if (expectedType.kind !== "record") {
           return null;
         }
@@ -132,10 +136,11 @@ export function jsonCompletion(
   function completeJson(context: CompletionContext): CompletionResult | null {
     const position = context.pos;
 
-    const jsonState = context.state.field(jsonStateField, false);
-    if (!jsonState) {
+    // Ensure JSON state is up-to-date
+    if (!context.view) {
       return null;
     }
+    const jsonState = ensureJsonState(context.view, schema);
     const parseResult = jsonState.parseResult;
     if (!parseResult.value) {
       return null;

@@ -1,7 +1,5 @@
 import { Extension } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
-import { parseJsonValue } from "../json/json_parser";
-import { validateSchema } from "../json/schema_validator";
 import { makeJsonTemplate } from "../json/to_json";
 import {
   ArrayTypeSignature,
@@ -10,6 +8,7 @@ import {
   RecordTypeSignature,
   TypeDefinition,
 } from "../json/types";
+import { ensureJsonState } from "./json_state";
 
 /**
  * Triggered when the Enter key is pressed between 2 consecutive curly braces or
@@ -32,12 +31,12 @@ export function enterKeyHandler(schema: TypeDefinition): Extension {
           return false; // Allow default Enter behavior
         }
 
-        const jsonCode = state.doc.toString();
-        const parseResult = parseJsonValue(jsonCode);
+        // Ensure JSON state is up-to-date
+        const jsonState = ensureJsonState(view, schema);
+        const parseResult = jsonState.parseResult;
         if (!parseResult.value) {
           return false;
         }
-        validateSchema(parseResult.value, schema);
         const jsonValue: JsonValue = parseResult.value;
 
         const idToRecordDef: { [id: string]: RecordDefinition } = {};

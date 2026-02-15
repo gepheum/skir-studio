@@ -132,4 +132,58 @@ describe("json_parser", () => {
     });
     expect(result.errors.length > 0).toBe(true);
   });
+
+  it("parses object with missing value (lenient)", () => {
+    const result = parseJsonValue(`{
+      "foo": true,
+      "bar"
+    }`);
+    // Lenient parsing: returns a value even with errors
+    // Note: "bar" without a value is skipped in the keyValues
+    expect(result.value).toMatch({
+      kind: "object",
+      keyValues: {
+        foo: {
+          key: "foo",
+          value: { kind: "literal", jsonCode: "true", type: "boolean" },
+        },
+      },
+    });
+    expect(result.errors.length > 0).toBe(true);
+  });
+
+  it("parses object with trailing comma (lenient)", () => {
+    const result = parseJsonValue(`{
+      "a": 1,
+      "b": 2,
+    }`);
+    // Lenient parsing: returns a value even with errors
+    expect(result.value).toMatch({
+      kind: "object",
+      keyValues: {
+        a: {
+          key: "a",
+          value: { kind: "literal", jsonCode: "1", type: "number" },
+        },
+        b: {
+          key: "b",
+          value: { kind: "literal", jsonCode: "2", type: "number" },
+        },
+      },
+    });
+    expect(result.errors.length > 0).toBe(true);
+  });
+
+  it("parses array with trailing comma (lenient)", () => {
+    const result = parseJsonValue(`[1, 2,]`);
+    // Lenient parsing: returns a value even with errors
+    expect(result.value).toMatch({
+      kind: "array",
+      values: [
+        { kind: "literal", jsonCode: "1", type: "number" },
+        { kind: "literal", jsonCode: "2", type: "number" },
+      ],
+    });
+    expect(result.errors.length > 0).toBe(true);
+  });
 });

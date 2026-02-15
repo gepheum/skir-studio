@@ -1,6 +1,7 @@
 import type {
   JsonArray,
   JsonError,
+  JsonKey,
   JsonKeyValue,
   JsonObject,
   JsonParseResult,
@@ -222,7 +223,7 @@ class JsonParser {
   private parseObject(): JsonObject {
     const leftBracket = this.nextToken();
     const keyValues: { [key: string]: JsonKeyValue } = {};
-    const allKeys: Segment[] = [];
+    const allKeys: JsonKey[] = [];
     let expectComma = false;
     while (true) {
       if (this.peekToken().jsonCode === "}") {
@@ -284,12 +285,15 @@ class JsonParser {
         this.skip();
         continue;
       }
-      allKeys.push(keyToken.segment);
+      const key = JSON.parse(keyToken.jsonCode) as string;
+      allKeys.push({
+        key: key,
+        keySegment: keyToken.segment,
+      });
       this.nextToken();
       if (!this.expectSymbolOrSkip(":")) {
         continue;
       }
-      const key = JSON.parse(keyToken.jsonCode) as string;
       if (keyValues[key]) {
         this.errors.push({
           kind: "error",
