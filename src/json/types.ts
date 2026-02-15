@@ -25,6 +25,9 @@ export interface JsonParseResult {
   /// If `undefined`, then `errors` is guaranteed not to be empty.
   readonly value: JsonValue | undefined;
   readonly errors: readonly JsonError[];
+  /// Set of edits to apply to the original JSON code to fix formatting and
+  // comma errors (no comma between consecutive values, trailing comma).
+  readonly edits: readonly JsonEdit[];
 }
 
 export type JsonValue = JsonArray | JsonObject | JsonLiteral;
@@ -107,6 +110,11 @@ export type Path =
 export interface JsonValueContext {
   readonly value: JsonValue;
   readonly path: Path;
+}
+
+export interface JsonEdit {
+  readonly segment: Segment;
+  readonly replacement: string;
 }
 
 // -----------------------------------------------------------------------------

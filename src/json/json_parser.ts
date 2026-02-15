@@ -1,5 +1,6 @@
 import type {
   JsonArray,
+  JsonEdit,
   JsonError,
   JsonKey,
   JsonKeyValue,
@@ -15,15 +16,17 @@ export function parseJsonValue(input: string): JsonParseResult {
     return {
       value: undefined,
       errors: [tokens],
+      edits: [],
     };
   }
-  const parser = new JsonParser(tokens.tokens);
+  const parser = new JsonParser(tokens.tokens, input);
   const parseResult = parser.parseValueOrSkip();
   parser.expectEnd();
 
   return {
     value: parseResult,
     errors: parser.errors,
+    edits: parser.edits,
   };
 }
 
@@ -83,9 +86,11 @@ function tokenize(input: string): JsonTokens | JsonError {
 }
 
 class JsonParser {
-  constructor(private tokens: JsonToken[]) {}
-  private i = 0;
+  constructor(private tokens: JsonToken[], private readonly input: string) {}
+  private tokenIndex = 0;
   errors: JsonError[] = [];
+  edits: JsonEdit[] = [];
+  private indent = "";
 
   parseValueOrSkip(): JsonValue | undefined {
     const token = this.peekToken();
@@ -165,7 +170,6 @@ class JsonParser {
   private parseArray(): JsonArray {
     const leftBracket = this.nextToken();
     const values: JsonValue[] = [];
-    let expectComma = false;
     while (true) {
       if (this.peekToken().jsonCode === "]") {
         const rightBracket = this.nextToken();
@@ -209,13 +213,20 @@ class JsonParser {
           values,
         };
       }
-      if (expectComma && !this.expectSymbolOrSkip(",")) {
-        continue;
-      }
-      expectComma = true;
       const value = this.parseValueOrSkip();
       if (value) {
         values.push(value);
+      }
+      if (this.peekToken().jsonCode === ",") {
+        const commaToken = this.nextToken();
+        // Check if this is a trailing comma
+        if (this.peekToken().jsonCode === "]") {
+          // Trailing comma - add edit to remove it
+          this.edits.push({
+            segment: commaToken.segment,
+            replacement: "",
+          });
+        }
       }
     }
   }
@@ -224,7 +235,6 @@ class JsonParser {
     const leftBracket = this.nextToken();
     const keyValues: { [key: string]: JsonKeyValue } = {};
     const allKeys: JsonKey[] = [];
-    let expectComma = false;
     while (true) {
       if (this.peekToken().jsonCode === "}") {
         const rightBracket = this.nextToken();
@@ -271,10 +281,6 @@ class JsonParser {
           allKeys,
         };
       }
-      if (expectComma && !this.expectSymbolOrSkip(",")) {
-        continue;
-      }
-      expectComma = true;
       const keyToken = this.peekToken();
       if (!keyToken.jsonCode.startsWith('"')) {
         this.errors.push({
@@ -283,6 +289,10 @@ class JsonParser {
           segment: keyToken.segment,
         });
         this.skip();
+        // Consume comma if we're stuck at one to avoid infinite loop
+        if (this.peekToken().jsonCode === ",") {
+          this.nextToken();
+        }
         continue;
       }
       const key = JSON.parse(keyToken.jsonCode) as string;
@@ -309,6 +319,17 @@ class JsonParser {
           value: value,
         };
       }
+      if (this.peekToken().jsonCode === ",") {
+        const commaToken = this.nextToken();
+        // Check if this is a trailing comma
+        if (this.peekToken().jsonCode === "}") {
+          // Trailing comma - add edit to remove it
+          this.edits.push({
+            segment: commaToken.segment,
+            replacement: "",
+          });
+        }
+      }
     }
   }
 
@@ -323,13 +344,74 @@ class JsonParser {
   }
 
   private nextToken(): JsonToken {
-    const result = this.tokens[this.i];
-    ++this.i;
+    const result = this.tokens[this.tokenIndex];
+
+    // Check the whitespace separator before the current token.
+    {
+      const previous =
+        this.tokenIndex <= 0 ? undefined : this.tokens[this.tokenIndex - 1];
+      const separatorSegment: Segment = {
+        start: previous ? previous.segment.end : 0,
+        end: result.segment.start,
+      };
+      const actualSeparator = this.input.substring(
+        separatorSegment.start,
+        separatorSegment.end,
+      );
+      const expectedSeparator = this.inferWhitespaceSeparator(
+        previous?.jsonCode ?? "",
+        result.jsonCode,
+      );
+
+      if (actualSeparator !== expectedSeparator.text) {
+        this.edits.push({
+          segment: separatorSegment,
+          replacement: expectedSeparator.text,
+        });
+      }
+      this.indent = expectedSeparator.newIndent ?? this.indent;
+    }
+
+    ++this.tokenIndex;
     return result;
   }
 
+  private inferWhitespaceSeparator(a: string, b: string): WhitespaceSeparator {
+    const { indent } = this;
+    if (a === ":") {
+      return {
+        text: " ",
+      };
+    } else if (a === "," && b !== "]" && b !== "}") {
+      return {
+        text: `\n${indent}`,
+      };
+    } else if (/[0-9"}\]el]$/.test(a) && /^[0-9"{[tfn-]/.test(b)) {
+      // a is the end of a JSON value and B is the start of a JSON value
+      return {
+        text: `,\n${indent}`,
+      };
+    } else if ((a === "[" && b !== "]") || (a === "{" && b !== "}")) {
+      const newIndent = indent + INDENT_UNIT;
+      return {
+        text: `\n${newIndent}`,
+        newIndent: newIndent,
+      };
+    } else if ((a !== "[" && b === "]") || (a !== "{" && b === "}")) {
+      const newIndent = indent.replace(INDENT_UNIT, "");
+      return {
+        text: `\n${newIndent}`,
+        newIndent: newIndent,
+      };
+    } else {
+      return {
+        text: "",
+      };
+    }
+  }
+
   private peekToken(): JsonToken {
-    return this.tokens[this.i];
+    return this.tokens[this.tokenIndex];
   }
 
   private expectSymbolOrSkip(symbol: string): boolean {
@@ -353,7 +435,8 @@ class JsonParser {
         tokenJson === "" ||
         tokenJson === "," ||
         tokenJson === "]" ||
-        tokenJson === "}"
+        tokenJson === "}" ||
+        tokenJson.startsWith('"')
       ) {
         return;
       } else if (tokenJson === "[") {
@@ -366,3 +449,12 @@ class JsonParser {
     }
   }
 }
+
+/// Text to insert between two consecutive tokens.
+interface WhitespaceSeparator {
+  /// Matches /(,?)(\n?)( )*/
+  text: string;
+  newIndent?: string;
+}
+
+const INDENT_UNIT = "  ";

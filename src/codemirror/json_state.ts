@@ -42,7 +42,7 @@ export function ensureJsonState(
 
   // Parse and validate immediately
   const parseResult = parseJsonValue(jsonCode);
-  let validationResult;
+  let validationResult: ValidationResult | undefined;
   if (parseResult.value) {
     validationResult = validateSchema(parseResult.value, schema);
   }
@@ -92,14 +92,42 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
           const jsonCode = this.view.state.doc.toString();
           const parseResult = parseJsonValue(jsonCode);
 
-          let validationResult;
+          let validationResult: ValidationResult | undefined;
           if (parseResult.value) {
             validationResult = validateSchema(parseResult.value, schema);
           }
 
-          this.view.dispatch({
-            effects: updateJsonState.of({ parseResult, validationResult }),
-          });
+          // Apply edits if there are any and if there is no error
+          // and if the cursor is not inside any edited segment
+          const cursorInsideEdit = (): boolean => {
+            const cursorPos = this.view.state.selection.main.head;
+            return parseResult.edits.some(
+              (edit) =>
+                edit.segment.start <= cursorPos &&
+                cursorPos <= edit.segment.end,
+            );
+          };
+          if (
+            parseResult.edits.length &&
+            parseResult.errors.length <= 0 &&
+            !cursorInsideEdit()
+          ) {
+            const changes = parseResult.edits.map((edit) => ({
+              from: edit.segment.start,
+              to: edit.segment.end,
+              insert: edit.replacement,
+            }));
+
+            this.view.dispatch({
+              changes,
+              effects: updateJsonState.of({ parseResult, validationResult }),
+              scrollIntoView: true,
+            });
+          } else {
+            this.view.dispatch({
+              effects: updateJsonState.of({ parseResult, validationResult }),
+            });
+          }
         }
 
         destroy(): void {
