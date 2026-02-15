@@ -59,6 +59,7 @@ function createEditorState(
         ".cm-lintRange-info": {
           backgroundColor: "#f6f6f6",
           backgroundImage: "none",
+          mixBlendMode: "multiply",
         },
         ".cm-lintRange-error": {
           backgroundImage: "none",
