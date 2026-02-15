@@ -9,8 +9,9 @@ import type {
 } from "../json/types";
 
 export interface JsonState {
-  parseResult: JsonParseResult;
-  validationResult?: ValidationResult;
+  readonly parseResult: JsonParseResult;
+  readonly validationResult?: ValidationResult;
+  readonly source: string;
 }
 
 const updateJsonState = StateEffect.define<JsonState>();
@@ -38,16 +39,21 @@ export function ensureJsonState(
   schema: TypeDefinition,
 ): JsonState {
   const currentState = view.state.field(jsonStateField, false);
-  const jsonCode = view.state.doc.toString();
+  const source = view.state.doc.toString();
+
+  // If the source hasn't changed, return the current state
+  if (currentState && currentState.source === source) {
+    return currentState;
+  }
 
   // Parse and validate immediately
-  const parseResult = parseJsonValue(jsonCode);
+  const parseResult = parseJsonValue(source);
   let validationResult: ValidationResult | undefined;
   if (parseResult.value) {
     validationResult = validateSchema(parseResult.value, schema);
   }
 
-  const newState: JsonState = { parseResult, validationResult };
+  const newState: JsonState = { parseResult, validationResult, source };
 
   // Update the state if it's different
   if (!currentState || currentState !== newState) {
@@ -89,16 +95,14 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
         }
 
         parseJson(): void {
-          const jsonCode = this.view.state.doc.toString();
-          const parseResult = parseJsonValue(jsonCode);
+          const source = this.view.state.doc.toString();
+          const parseResult = parseJsonValue(source);
 
           let validationResult: ValidationResult | undefined;
           if (parseResult.value) {
             validationResult = validateSchema(parseResult.value, schema);
           }
 
-          // Apply edits if there are any and if there is no error
-          // and if the cursor is not inside any edited segment
           const cursorInsideEdit = (): boolean => {
             const cursorPos = this.view.state.selection.main.head;
             return parseResult.edits.some(
@@ -107,6 +111,8 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
                 cursorPos <= edit.segment.end,
             );
           };
+
+          // Apply edits if there are any and if there is no error.
           if (
             parseResult.edits.length &&
             parseResult.errors.length <= 0 &&
@@ -120,12 +126,12 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
 
             this.view.dispatch({
               changes,
-              effects: updateJsonState.of({ parseResult, validationResult }),
+              effects: updateJsonState.of({ parseResult, validationResult, source }),
               scrollIntoView: true,
             });
           } else {
             this.view.dispatch({
-              effects: updateJsonState.of({ parseResult, validationResult }),
+              effects: updateJsonState.of({ parseResult, validationResult, source }),
             });
           }
         }

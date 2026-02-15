@@ -7,7 +7,7 @@ import {
   StructDefinition,
   TypeDefinition,
 } from "../json/types";
-import { ensureJsonState } from "./json_state";
+import { ensureJsonState, jsonStateField } from "./json_state";
 
 export function jsonCompletion(
   schema: TypeDefinition,
@@ -140,7 +140,19 @@ export function jsonCompletion(
     if (!context.view) {
       return null;
     }
-    const jsonState = ensureJsonState(context.view, schema);
+
+    // Check if character before cursor is a quote
+    const charBeforeCursor =
+      position > 0 ? context.state.doc.sliceString(position - 1, position) : "";
+    const shouldEnsureState = context.explicit || charBeforeCursor === '"';
+
+    const jsonState = shouldEnsureState
+      ? ensureJsonState(context.view, schema)
+      : context.state.field(jsonStateField, false);
+
+    if (!jsonState) {
+      return null;
+    }
     const parseResult = jsonState.parseResult;
     if (!parseResult.value) {
       return null;
