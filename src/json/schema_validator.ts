@@ -170,7 +170,7 @@ class SchemaValidator {
               if (fieldDef) {
                 if (fieldDef.doc) {
                   this.hints.push({
-                    segment: keyValue.firstToken,
+                    segment: keyValue.keyToken,
                     message: fieldDef.doc,
                   });
                 }
@@ -183,7 +183,7 @@ class SchemaValidator {
               } else {
                 this.errors.push({
                   kind: "error",
-                  segment: keyValue.firstToken,
+                  segment: keyValue.keyToken,
                   message: "Unknown field",
                 });
               }

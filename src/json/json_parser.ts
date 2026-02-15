@@ -301,7 +301,7 @@ class JsonParser {
       const value = this.parseValueOrSkip();
       if (value) {
         keyValues[key] = {
-          firstToken: keyToken.segment,
+          keyToken: keyToken.segment,
           key: key,
           value: value,
         };

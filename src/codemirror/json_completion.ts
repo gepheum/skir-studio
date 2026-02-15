@@ -54,14 +54,14 @@ export function jsonCompletion(
         if (recordDef.kind === "struct") {
           for (const keyValue of Object.values(jsonValue.keyValues)) {
             // First, see if the current position is within the key.
-            if (inSegment(position, keyValue.firstToken)) {
+            if (inSegment(position, keyValue.keyToken)) {
               const missingFieldNames = collectMissingFieldNames(
                 jsonValue,
                 recordDef,
               );
               return {
-                from: keyValue.firstToken.start + 1,
-                to: keyValue.firstToken.end - 1,
+                from: keyValue.keyToken.start + 1,
+                to: keyValue.keyToken.end - 1,
                 options: missingFieldNames.map((name) => ({
                   label: name,
                 })),

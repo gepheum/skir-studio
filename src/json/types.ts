@@ -39,8 +39,7 @@ export interface JsonArray {
 }
 
 export interface JsonKeyValue {
-  /// For the key.
-  readonly firstToken: Segment;
+  readonly keyToken: Segment;
   readonly key: string;
   readonly value: JsonValue;
   expectedType?: TypeSignature;
