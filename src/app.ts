@@ -141,18 +141,18 @@ export class App extends LitElement {
       left: 50%;
       transform: translateX(-50%);
       margin-top: 0.5rem;
-      padding: 8px 12px;
-      background: white;
-      color: #333;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 4px 8px;
+      background: #1f2937;
+      color: white;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      font-size: 12px;
       font-weight: 400;
-      line-height: 1.5;
+      line-height: 1.3;
       white-space: pre-wrap;
       min-width: 250px;
       max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       z-index: 1000;
       opacity: 0;
       transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -176,7 +176,7 @@ export class App extends LitElement {
       left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
-      border-bottom-color: white;
+      border-bottom-color: #1f2937;
     }
 
     .doc-badge-wrapper:hover .tooltip {

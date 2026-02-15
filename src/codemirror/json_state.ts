@@ -1,4 +1,4 @@
-import { StateEffect, StateField } from "@codemirror/state";
+import { Extension, StateEffect, StateField } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { parseJsonValue } from "../json/json_parser";
 import { validateSchema } from "../json/schema_validator";
@@ -30,7 +30,7 @@ export const jsonStateField = StateField.define<JsonState | null>({
   },
 });
 
-export function debouncedJsonParser(schema: TypeDefinition) {
+export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
   return [
     jsonStateField,
     ViewPlugin.fromClass(

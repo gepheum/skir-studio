@@ -64,6 +64,35 @@ function createEditorState(
           backgroundImage: "none",
           borderBottom: "3px solid #dc2626",
         },
+        ".cm-tooltip-hover": {
+          backgroundColor: "#1f2937",
+          border: "1px solid #374151",
+          borderRadius: "4px",
+          padding: "4px 8px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          fontSize: "12px",
+          lineHeight: "1.3",
+          color: "white",
+        },
+        ".cm-tooltip.cm-tooltip-lint": {
+          backgroundColor: "#1f2937",
+          border: "1px solid #374151",
+          borderRadius: "4px",
+          padding: "4px 8px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          color: "white",
+        },
+        ".cm-tooltip-lint .cm-diagnostic": {
+          color: "white",
+        },
+        ".cm-tooltip-lint .cm-diagnostic-error": {
+          color: "white",
+        },
+        ".cm-tooltip-lint .cm-diagnostic-info": {
+          color: "white",
+        },
       }),
       EditorView.baseTheme({
         ".cm-lint-marker-info": {
@@ -95,14 +124,15 @@ function createEditorState(
         ".cm-diagnostic-wrapper": {
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-          fontSize: "13px",
-          lineHeight: "1.5",
-          padding: "4px",
+          fontSize: "12px",
+          lineHeight: "1.3",
+          padding: "2px",
+          color: "white",
         },
         ".cm-diagnostic-controls": {
-          marginTop: "8px",
+          marginTop: "4px",
           display: "flex",
-          gap: "8px",
+          gap: "6px",
           alignItems: "center",
         },
         ".cm-diagnostic-label": {
@@ -111,36 +141,20 @@ function createEditorState(
         },
         ".cm-diagnostic-textarea": {
           flex: "1",
-          padding: "4px 8px",
-          border: "1px solid #e5e7eb",
-          borderRadius: "4px",
-          fontSize: "13px",
+          padding: "3px 6px",
+          border: "1px solid #4b5563",
+          borderRadius: "3px",
+          fontSize: "12px",
           fontFamily: "'JetBrains Mono', monospace",
           resize: "none",
           overflow: "auto",
           boxSizing: "border-box",
+          backgroundColor: "#1f2937",
+          color: "white",
         },
         ".cm-diagnostic-textarea[readonly]": {
-          backgroundColor: "#f9fafb",
+          backgroundColor: "#374151",
           cursor: "default",
-        },
-        ".cm-tooltip-hover": {
-          backgroundColor: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: "8px",
-          padding: "8px 12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-          fontSize: "13px",
-          lineHeight: "1.5",
-        },
-        ".cm-tooltip.cm-tooltip-lint": {
-          backgroundColor: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: "8px",
-          padding: "8px 12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         },
         ".cm-tooltip-lint .cm-diagnostic": {
           padding: "0",
