@@ -126,12 +126,20 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
 
             this.view.dispatch({
               changes,
-              effects: updateJsonState.of({ parseResult, validationResult, source }),
+              effects: updateJsonState.of({
+                parseResult,
+                validationResult,
+                source,
+              }),
               scrollIntoView: true,
             });
           } else {
             this.view.dispatch({
-              effects: updateJsonState.of({ parseResult, validationResult, source }),
+              effects: updateJsonState.of({
+                parseResult,
+                validationResult,
+                source,
+              }),
             });
           }
         }
