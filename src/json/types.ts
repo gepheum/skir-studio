@@ -197,7 +197,7 @@ export type VariantDefinition = {
 
 export interface TypeHint {
   readonly segment: Segment;
-  readonly message: string;
+  readonly message: string | readonly string[];
   readonly valueContext: JsonValueContext;
   /// In order. All are included in 'valueContext.value.segment'.
   readonly childHints: readonly TypeHint[];

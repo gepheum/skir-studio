@@ -81,10 +81,19 @@ class SchemaValidator {
     const pushTypeHint = (): void => {
       const typeDesc = getTypeDesc(schema);
       const typeDoc = getTypeDoc(schema, idToRecordDef);
-      const message = typeDoc ? `${typeDesc}\n\n${typeDoc}` : typeDesc;
+      const message = [typeDesc];
+      if (typeDoc) {
+        message.push(typeDoc);
+      }
+      if (value.kind === "array") {
+        const { length } = value.values;
+        if (length) {
+          message.push(`Length: ${length}`);
+        }
+      }
       const hint: MutableTypeHint = {
         segment: value.firstToken,
-        message: message,
+        message: message.length === 1 ? message[0] : message,
         valueContext: { value, path },
         childHints: [],
       };

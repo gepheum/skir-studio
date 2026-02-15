@@ -21,10 +21,10 @@ export function jsonLinter(
       return [];
     }
 
-    const { errors, hints: typeHints } = jsonState.validationResult;
+    const { errors, hints } = jsonState.validationResult;
     return errors
       .map(errorToDiagnostic)
-      .concat(typeHints.map((hint) => typeHintToDiagnostic(hint, editable)));
+      .concat(hints.map((hint) => hintToDiagnostic(hint, editable)));
   }
 
   return lintJson;
@@ -45,21 +45,28 @@ function errorToDiagnostic(error: JsonError): Diagnostic {
   };
 }
 
-function typeHintToDiagnostic(
+function hintToDiagnostic(
   typeHint: Hint,
   editable: "editable" | "read-only",
 ): Diagnostic {
+  const { message } = typeHint;
+  const isString =
+    (message === "string" || message === "string?") &&
+    typeHint.valueContext &&
+    typeHint.valueContext.value.kind === "literal" &&
+    typeHint.valueContext.value.type === "string";
   return {
     from: typeHint.segment.start,
     to: typeHint.segment.end,
-    message: typeHint.message,
+    message: "",
     severity: "info",
     renderMessage: (view): Node => {
       const wrapper = document.createElement("div");
       wrapper.className = "cm-diagnostic-wrapper";
 
-      // If the message is "string", add an editable text box with the parsed value
-      if (typeHint.message === "string") {
+      // If this is a type hint for a string value, add an editable text box
+      // with the parsed value
+      if (isString) {
         const jsonCode = view.state.doc.toString();
         const jsonString = jsonCode.substring(
           typeHint.segment.start,
@@ -103,9 +110,13 @@ function typeHintToDiagnostic(
         wrapper.appendChild(controlsDiv);
       } else {
         // Display the message for non-string types
-        const messageDiv = document.createElement("div");
-        messageDiv.textContent = typeHint.message;
-        wrapper.appendChild(messageDiv);
+        const pieces = typeof message === "string" ? [message] : message;
+        for (const piece of pieces) {
+          const messageDiv = document.createElement("div");
+          messageDiv.className = "diagnostic-row";
+          messageDiv.textContent = piece;
+          wrapper.appendChild(messageDiv);
+        }
       }
 
       return wrapper;

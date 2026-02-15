@@ -168,6 +168,11 @@ function createEditorState(
         ".cm-tooltip-lint .cm-diagnostic-info": {
           borderLeft: "none",
         },
+        ".diagnostic-row + .diagnostic-row": {
+          marginTop: "8px",
+          paddingTop: "8px",
+          borderTop: "1px solid #374151",
+        },
       }),
     ],
   });
