@@ -1,18 +1,18 @@
 import type {
   JsonArray,
   JsonError,
-  JsonErrors,
   JsonKeyValue,
   JsonObject,
+  JsonParseResult,
   JsonValue,
   Segment,
 } from "./types";
 
-export function parseJsonValue(input: string): JsonValue | JsonErrors {
+export function parseJsonValue(input: string): JsonParseResult {
   const tokens = tokenize(input);
   if (tokens.kind === "error") {
     return {
-      kind: "errors",
+      value: undefined,
       errors: [tokens],
     };
   }
@@ -20,16 +20,10 @@ export function parseJsonValue(input: string): JsonValue | JsonErrors {
   const parseResult = parser.parseValueOrSkip();
   parser.expectEnd();
 
-  if (parser.errors.length) {
-    return {
-      kind: "errors",
-      errors: parser.errors,
-    };
-  }
-  if (!parseResult) {
-    throw new Error(`input: ${input}`);
-  }
-  return parseResult;
+  return {
+    value: parseResult,
+    errors: parser.errors,
+  };
 }
 
 interface JsonToken {
@@ -228,6 +222,7 @@ class JsonParser {
   private parseObject(): JsonObject {
     const leftBracket = this.nextToken();
     const keyValues: { [key: string]: JsonKeyValue } = {};
+    const allKeys: Segment[] = [];
     let expectComma = false;
     while (true) {
       if (this.peekToken().jsonCode === "}") {
@@ -240,6 +235,7 @@ class JsonParser {
             end: rightBracket.segment.end,
           },
           keyValues,
+          allKeys,
         };
       }
       if (this.peekToken().jsonCode === "]") {
@@ -257,6 +253,7 @@ class JsonParser {
             end: wrongBracket.segment.end,
           },
           keyValues,
+          allKeys,
         };
       }
       if (this.peekToken().jsonCode === "") {
@@ -270,6 +267,7 @@ class JsonParser {
             end: this.peekToken().segment.start,
           },
           keyValues,
+          allKeys,
         };
       }
       if (expectComma && !this.expectSymbolOrSkip(",")) {
@@ -286,6 +284,7 @@ class JsonParser {
         this.skip();
         continue;
       }
+      allKeys.push(keyToken.segment);
       this.nextToken();
       if (!this.expectSymbolOrSkip(":")) {
         continue;
@@ -301,7 +300,7 @@ class JsonParser {
       const value = this.parseValueOrSkip();
       if (value) {
         keyValues[key] = {
-          keyToken: keyToken.segment,
+          keySegment: keyToken.segment,
           key: key,
           value: value,
         };

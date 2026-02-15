@@ -34,11 +34,11 @@ export function enterKeyHandler(schema: TypeDefinition): Extension {
 
         const jsonCode = state.doc.toString();
         const parseResult = parseJsonValue(jsonCode);
-        if (parseResult.kind === "errors") {
+        if (!parseResult.value) {
           return false;
         }
-        validateSchema(parseResult, schema);
-        const jsonValue: JsonValue = parseResult;
+        validateSchema(parseResult.value, schema);
+        const jsonValue: JsonValue = parseResult.value;
 
         const idToRecordDef: { [id: string]: RecordDefinition } = {};
         for (const record of schema.records) {

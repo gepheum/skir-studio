@@ -3,14 +3,13 @@ import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { parseJsonValue } from "../json/json_parser";
 import { validateSchema } from "../json/schema_validator";
 import type {
-  JsonErrors,
-  JsonValue,
+  JsonParseResult,
   TypeDefinition,
   ValidationResult,
 } from "../json/types";
 
 export interface JsonState {
-  parseResult: JsonValue | JsonErrors;
+  parseResult: JsonParseResult;
   validationResult?: ValidationResult;
 }
 
@@ -64,8 +63,8 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
           const parseResult = parseJsonValue(jsonCode);
 
           let validationResult;
-          if (parseResult.kind !== "errors") {
-            validationResult = validateSchema(parseResult, schema);
+          if (parseResult.value) {
+            validationResult = validateSchema(parseResult.value, schema);
           }
 
           this.view.dispatch({

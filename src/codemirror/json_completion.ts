@@ -1,6 +1,4 @@
 import { CompletionContext, CompletionResult } from "@codemirror/autocomplete";
-import { parseJsonValue } from "../json/json_parser";
-import { validateSchema } from "../json/schema_validator";
 import {
   JsonObject,
   JsonValue,
@@ -9,6 +7,7 @@ import {
   StructDefinition,
   TypeDefinition,
 } from "../json/types";
+import { jsonStateField } from "./json_state";
 
 export function jsonCompletion(
   schema: TypeDefinition,
@@ -54,14 +53,14 @@ export function jsonCompletion(
         if (recordDef.kind === "struct") {
           for (const keyValue of Object.values(jsonValue.keyValues)) {
             // First, see if the current position is within the key.
-            if (inSegment(position, keyValue.keyToken)) {
+            if (inSegment(position, keyValue.keySegment)) {
               const missingFieldNames = collectMissingFieldNames(
                 jsonValue,
                 recordDef,
               );
               return {
-                from: keyValue.keyToken.start + 1,
-                to: keyValue.keyToken.end - 1,
+                from: keyValue.keySegment.start + 1,
+                to: keyValue.keySegment.end - 1,
                 options: missingFieldNames.map((name) => ({
                   label: name,
                 })),
@@ -132,16 +131,16 @@ export function jsonCompletion(
 
   function completeJson(context: CompletionContext): CompletionResult | null {
     const position = context.pos;
-    const jsonCode = context.state.doc.toString();
 
-    const parseResult = parseJsonValue(jsonCode);
-    if (parseResult.kind === "errors") {
+    const jsonState = context.state.field(jsonStateField, false);
+    if (!jsonState) {
       return null;
     }
-    validateSchema(parseResult, schema);
-    const jsonValue: JsonValue = parseResult;
-
-    return doCompleteJson(jsonValue, position);
+    const parseResult = jsonState.parseResult;
+    if (!parseResult.value) {
+      return null;
+    }
+    return doCompleteJson(parseResult.value, position);
   }
 
   return completeJson;

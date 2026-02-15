@@ -52,13 +52,17 @@ export function validateOrThrowError(
   // TODO: show line/col numbers in error messages instead of position
 
   const parseResult = parseJsonValue(jsonCode);
-  if (parseResult.kind === "errors") {
+  if (parseResult.errors.length > 0) {
     const firstError = parseResult.errors[0];
     const { message, segment } = firstError;
     throw new Error(`JSON parsing error at ${segment.start}: ${message}`);
   }
 
-  const validationResult = validateSchema(parseResult, schema);
+  if (!parseResult.value) {
+    throw new Error("JSON parsing failed");
+  }
+
+  const validationResult = validateSchema(parseResult.value, schema);
   const { errors } = validationResult;
   if (errors.length) {
     const firstError = errors[0];
@@ -170,7 +174,7 @@ class SchemaValidator {
               if (fieldDef) {
                 if (fieldDef.doc) {
                   this.hints.push({
-                    segment: keyValue.keyToken,
+                    segment: keyValue.keySegment,
                     message: fieldDef.doc,
                   });
                 }
@@ -183,7 +187,7 @@ class SchemaValidator {
               } else {
                 this.errors.push({
                   kind: "error",
-                  segment: keyValue.keyToken,
+                  segment: keyValue.keySegment,
                   message: "Unknown field",
                 });
               }

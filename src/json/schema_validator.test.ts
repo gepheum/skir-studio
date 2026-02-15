@@ -6,10 +6,10 @@ import { JsonValue, TypeDefinition } from "./types.js";
 
 function parse(json: string): JsonValue {
   const result = parseJsonValue(json);
-  if (result.kind === "errors") {
+  if (!result.value) {
     throw new Error(`JSON parse error: ${JSON.stringify(result.errors)}`);
   }
-  return result;
+  return result.value;
 }
 
 describe("schema_validator", () => {

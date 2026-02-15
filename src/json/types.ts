@@ -17,14 +17,15 @@ export interface JsonError {
   readonly message: string;
 }
 
-export interface JsonErrors {
-  readonly kind: "errors";
-  readonly errors: JsonError[];
-}
-
 // -----------------------------------------------------------------------------
 // PARSING
 // -----------------------------------------------------------------------------
+
+export interface JsonParseResult {
+  /// If `undefined`, then `errors` is guaranteed not to be empty.
+  readonly value: JsonValue | undefined;
+  readonly errors: readonly JsonError[];
+}
 
 export type JsonValue = JsonArray | JsonObject | JsonLiteral;
 
@@ -39,7 +40,7 @@ export interface JsonArray {
 }
 
 export interface JsonKeyValue {
-  readonly keyToken: Segment;
+  readonly keySegment: Segment;
   readonly key: string;
   readonly value: JsonValue;
   expectedType?: TypeSignature;
@@ -52,12 +53,15 @@ export interface JsonObject {
   /// From '{' to '}' included.
   readonly segment: Segment;
   readonly keyValues: { [key: string]: JsonKeyValue };
+  /// Includes "broken" keys which produced a parsing error.
+  /// All guaranteed to be string literals.
+  readonly allKeys: readonly Segment[];
   expectedType?: TypeSignature;
 }
 
 export interface JsonLiteral {
   readonly kind: "literal";
-  /// Position of the first and only token. Same as 'segment'.
+  /// Position of the first and only token. Same as `segment`.
   readonly firstToken: Segment;
   readonly segment: Segment;
   readonly jsonCode: string;

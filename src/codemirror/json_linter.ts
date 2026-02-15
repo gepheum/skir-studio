@@ -13,7 +13,7 @@ export function jsonLinter(
     }
 
     const parseResult = jsonState.parseResult;
-    if (parseResult.kind === "errors") {
+    if (parseResult.errors.length) {
       return parseResult.errors.map(errorToDiagnostic);
     }
 
