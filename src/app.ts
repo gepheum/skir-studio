@@ -45,18 +45,28 @@ export class App extends LitElement {
 
     h1 {
       margin: 0;
-      padding: 0.75rem 1rem;
-      background: var(--bg-panel);
+      padding: 0.75rem 1.5rem;
+      background: #050505;
       color: var(--accent);
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: 700;
       border-bottom: 1px solid var(--border);
-      letter-spacing: -0.2px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      position: relative;
     }
 
     h1 a {
       color: inherit;
       text-decoration: none;
+      background: linear-gradient(to right, #7aa2f7, #bb9af7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(122, 162, 247, 0.3);
     }
 
     .service-section {
@@ -113,6 +123,17 @@ export class App extends LitElement {
     input[type="password"]:focus {
       outline: none;
       border-color: var(--accent);
+    }
+
+    /* Prevent white background on Chrome autofill */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px var(--bg-dark) inset !important;
+      -webkit-text-fill-color: var(--fg) !important;
+      transition: background-color 5000s ease-in-out 0s; /* Delay the background color change */
+      caret-color: var(--fg);
     }
 
     .method-section {
@@ -399,7 +420,7 @@ export class App extends LitElement {
     const { methodList, selectedMethod } = this;
     if (methodList.kind === "zero-state") {
       return html`<div class="zero-state">
-        Enter a service URL above and click "Fetch Methods" to get started
+        Enter a service URL above and click "Get Methods" to get started
       </div>`;
     } else if (methodList.kind === "loading") {
       return html`<div class="loading">Loading methods...</div>`;
@@ -480,7 +501,7 @@ export class App extends LitElement {
         serviceUrl,
         authorizationHeader,
       };
-      this.fetchMethodList();
+      this.getMethodList();
     };
 
     return html`<div class="service-section">
@@ -506,7 +527,7 @@ export class App extends LitElement {
       </div>
 
       <div class="button-group">
-        <button @click=${onClick}>Fetch Methods</button>
+        <button @click=${onClick}>Get Methods</button>
       </div>
     </div>`;
   }
@@ -554,11 +575,11 @@ export class App extends LitElement {
     // See if the URL has a "skir-studio" query parameter
     const thisUrl = new URL(document.location.href);
     if (thisUrl.searchParams.has("skir-studio")) {
-      this.fetchMethodList();
+      this.getMethodList();
     }
   }
 
-  private async fetchMethodList(): Promise<void> {
+  private async getMethodList(): Promise<void> {
     const { serviceUrl, authorizationHeader } = this.serviceSpec;
     if (
       this.methodList.kind === "loading" &&
@@ -594,7 +615,7 @@ export class App extends LitElement {
       methods.sort((a, b) => a.method.method.localeCompare(b.method.method));
       this.methodList = { kind: "ok", methods };
     } catch (error) {
-      console.error("Error fetching method list: ", error);
+      console.error("Error getting method list: ", error);
       const message =
         error instanceof Error ? error.message : "Unknown error occurred";
       this.methodList = { kind: "error", message };
