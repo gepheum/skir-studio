@@ -35,7 +35,7 @@ function createEditorState(
   editable: "editable" | "read-only",
 ): EditorState {
   // Tokyo Night theme colors
-  // TODO: make this a parameter of the exported function
+  // TODO: make this a parameter of the exported
   const theme = {
     background: "#1a1b26",
     lighterBg: "#1f2335",
@@ -71,8 +71,10 @@ function createEditorState(
           overflow: "auto",
         },
         ".cm-lintRange-info": {
-          backgroundColor: theme.selection,
           backgroundImage: "none",
+        },
+        ".cm-lintRange-info:hover": {
+          backgroundColor: theme.selection,
         },
         ".cm-lintRange-error": {
           backgroundImage: "none",
