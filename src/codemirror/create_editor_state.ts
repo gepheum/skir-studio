@@ -3,6 +3,7 @@ import { json } from "@codemirror/lang-json";
 import { linter, lintGutter } from "@codemirror/lint";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { basicSetup } from "codemirror";
 import { makeJsonTemplate } from "../json/to_json";
 import type { Json, RecordDefinition, TypeDefinition } from "../json/types";
@@ -33,12 +34,25 @@ function createEditorState(
   content: Json,
   editable: "editable" | "read-only",
 ): EditorState {
+  // Tokyo Night theme colors
+  // TODO: make this a parameter of the exported function
+  const theme = {
+    background: "#1a1b26",
+    lighterBg: "#1f2335",
+    border: "#414868",
+    foreground: "#c0caf5",
+    accent: "#7aa2f7",
+    error: "#f7768e",
+    selection: "#515c7e40",
+  };
+
   return EditorState.create({
     doc: JSON.stringify(content, null, 2),
     extensions: [
       EditorState.readOnly.of(editable === "read-only"),
       enterKeyHandler(schema),
       basicSetup,
+      tokyoNight,
       json(),
       debouncedJsonParser(schema),
       linter(jsonLinter(editable)),
@@ -57,42 +71,50 @@ function createEditorState(
           overflow: "auto",
         },
         ".cm-lintRange-info": {
-          backgroundColor: "#f6f6f6",
+          backgroundColor: theme.selection,
           backgroundImage: "none",
-          mixBlendMode: "multiply",
         },
         ".cm-lintRange-error": {
           backgroundImage: "none",
-          borderBottom: "3px solid #dc2626",
+          borderBottom: `3px solid ${theme.error}`,
         },
         ".cm-tooltip-hover": {
-          backgroundColor: "#1f2937",
-          border: "1px solid #374151",
+          backgroundColor: theme.lighterBg,
+          border: `1px solid ${theme.border}`,
           borderRadius: "4px",
           padding: "4px 8px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
           fontSize: "12px",
           lineHeight: "1.3",
-          color: "white",
+          color: theme.foreground,
         },
         ".cm-tooltip.cm-tooltip-lint": {
-          backgroundColor: "#1f2937",
-          border: "1px solid #374151",
+          backgroundColor: theme.lighterBg,
+          border: `1px solid ${theme.border}`,
           borderRadius: "4px",
           padding: "4px 8px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-          color: "white",
-        },
-        ".cm-tooltip-lint .cm-diagnostic": {
-          color: "white",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+          color: theme.foreground,
         },
         ".cm-tooltip-lint .cm-diagnostic-error": {
-          color: "white",
+          fontWeight: "bold",
+          color: theme.error,
         },
-        ".cm-tooltip-lint .cm-diagnostic-info": {
-          color: "white",
+        ".cm-status-bar": {
+          backgroundColor: theme.lighterBg,
+          borderTopColor: theme.border,
+          color: theme.accent,
+        },
+        ".cm-diagnostic-textarea": {
+          backgroundColor: theme.lighterBg,
+          borderColor: theme.border,
+          color: theme.foreground,
+        },
+        ".cm-diagnostic-textarea[readonly]": {
+          backgroundColor: theme.background,
+        },
+        ".diagnostic-row + .diagnostic-row": {
+          borderTopColor: theme.border,
         },
       }),
       EditorView.baseTheme({
@@ -104,12 +126,8 @@ function createEditorState(
           flexDirection: "row-reverse",
           justifyContent: "flex-end",
           padding: "4px 12px",
-          backgroundColor: "#f3f4f6",
-          borderTop: "1px solid #e5e7eb",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          borderTop: "1px solid",
           fontSize: "12px",
-          color: "#6b7280",
           height: "16px",
         },
         ".cm-status-bar-link": {
@@ -123,12 +141,9 @@ function createEditorState(
           textDecoration: "underline",
         },
         ".cm-diagnostic-wrapper": {
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
           fontSize: "12px",
           lineHeight: "1.3",
           padding: "2px",
-          color: "white",
         },
         ".cm-diagnostic-controls": {
           marginTop: "4px",
@@ -143,18 +158,15 @@ function createEditorState(
         ".cm-diagnostic-textarea": {
           flex: "1",
           padding: "3px 6px",
-          border: "1px solid #4b5563",
+          border: "1px solid",
           borderRadius: "3px",
           fontSize: "12px",
           fontFamily: "'JetBrains Mono', monospace",
           resize: "none",
           overflow: "auto",
           boxSizing: "border-box",
-          backgroundColor: "#1f2937",
-          color: "white",
         },
         ".cm-diagnostic-textarea[readonly]": {
-          backgroundColor: "#374151",
           cursor: "default",
         },
         ".cm-tooltip-lint .cm-diagnostic": {
@@ -172,7 +184,7 @@ function createEditorState(
         ".diagnostic-row + .diagnostic-row": {
           marginTop: "8px",
           paddingTop: "8px",
-          borderTop: "1px solid #374151",
+          borderTop: "1px solid",
         },
       }),
     ],
