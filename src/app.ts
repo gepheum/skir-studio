@@ -119,19 +119,22 @@ export class App extends LitElement {
 
     input[type="text"],
     input[type="password"] {
-      padding: 0.4rem 0.6rem;
+      padding: 0.5rem 0.8rem;
       border: 1px solid var(--border);
-      border-radius: 2px;
-      font-size: 0.8rem;
-      background: var(--bg-dark);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.03);
       color: var(--fg);
-      font-family: "JetBrains Mono", monospace;
+      font-family: inherit;
+      transition: all 0.2s ease;
     }
 
     input[type="text"]:focus,
     input[type="password"]:focus {
       outline: none;
       border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
     }
 
     /* Prevent white background on Chrome autofill */
@@ -230,23 +233,31 @@ export class App extends LitElement {
     }
 
     select {
-      padding: 0.4rem 2rem 0.4rem 0.6rem;
+      padding: 0.5rem 2.5rem 0.5rem 0.8rem;
       border: 1px solid var(--border);
-      border-radius: 2px;
-      font-size: 0.8rem;
-      background: var(--bg-dark);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background-color: rgba(255, 255, 255, 0.03);
       color: var(--fg);
       min-width: 200px;
       font-family: inherit;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c0caf5' d='M6 8.825L1.175 4 2.238 2.938 6 6.7 9.763 2.938 10.825 4z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 0.7em top 50%;
+      background-position: right 1em top 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    select:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: #565f89;
     }
 
     select:focus {
       outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
     }
 
     .content-section {
@@ -308,37 +319,49 @@ export class App extends LitElement {
     }
 
     button {
-      padding: 0.4rem 1.2rem;
+      padding: 0.5rem 1.5rem;
       background: var(--bg-lighter);
       color: var(--fg);
       border: 1px solid var(--border);
-      border-radius: 2px;
-      font-size: 0.8rem;
-      font-weight: 500;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       font-family: inherit;
     }
 
     button:hover {
       background: var(--border);
       color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    button:active {
+      transform: translateY(0);
     }
 
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .send-button {
       background: rgba(158, 206, 106, 0.1);
-      border-color: var(--success);
+      border-color: rgba(158, 206, 106, 0.2);
       color: var(--success);
+      padding: 0.35rem 1rem;
+      font-size: 0.8rem;
     }
 
     .send-button:hover {
       background: var(--success);
-      color: var(--bg-dark);
+      color: #000;
+      border-color: var(--success);
+      box-shadow: 0 0 15px rgba(158, 206, 106, 0.3);
     }
 
     .error {
