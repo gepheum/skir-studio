@@ -47,26 +47,35 @@ export class App extends LitElement {
       margin: 0;
       padding: 0.75rem 1.5rem;
       background: #050505;
-      color: var(--accent);
       font-size: 1.1rem;
       font-weight: 700;
       border-bottom: 1px solid var(--border);
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      display: flex;
-      align-items: center;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       z-index: 10;
       position: relative;
     }
 
     h1 a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       color: inherit;
       text-decoration: none;
+      width: fit-content;
+    }
+
+    .header-text {
       background: linear-gradient(to right, #7aa2f7, #bb9af7);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 30px rgba(122, 162, 247, 0.3);
+    }
+
+    .header-icon {
+      font-size: 1em;
+      line-height: 1;
     }
 
     .service-section {
@@ -411,7 +420,12 @@ export class App extends LitElement {
 
   override render(): TemplateResult {
     return html` <div class="app">
-      <h1><a href="/">RPC Studio</a></h1>
+      <h1>
+        <a href="/">
+          <span class="header-icon">📡</span>
+          <span class="header-text">RPC Studio</span>
+        </a>
+      </h1>
       ${this.renderServiceUrlSelector()} ${this.renderContent()}
     </div>`;
   }
