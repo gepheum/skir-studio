@@ -422,7 +422,7 @@ export class App extends LitElement {
     return html` <div class="app">
       <h1>
         <a href="/">
-          <span class="header-icon">📡</span>
+          <span class="header-icon">⚡</span>
           <span class="header-text">RPC Studio</span>
         </a>
       </h1>
