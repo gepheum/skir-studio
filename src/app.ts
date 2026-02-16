@@ -15,6 +15,8 @@ import type { Json, TypeDefinition } from "./json/types.js";
 @customElement("skir-studio-app")
 export class App extends LitElement {
   static override styles = css`
+    @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+
     :host {
       --bg-dark: #0a0b12;
       --bg-panel: #13141f;
