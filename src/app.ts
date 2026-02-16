@@ -24,11 +24,12 @@ export class App extends LitElement {
       --accent: #7aa2f7;
       --error: #f7768e;
       --success: #9ece6a;
-      
+
       display: block;
       height: 100vh;
       width: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
       background: var(--bg-dark);
       color: var(--fg);
       overflow: hidden;
