@@ -130,6 +130,7 @@ describe("json_parser", () => {
         { segment: { start: 0, end: 1 }, replacement: "" },
         { segment: { start: 2, end: 3 }, replacement: "\n  " },
         { segment: { start: 4, end: 5 }, replacement: "\n" },
+        { segment: { start: 6, end: 7 }, replacement: "" },
       ],
     });
   });
@@ -158,7 +159,7 @@ describe("json_parser", () => {
           segment: { start: 1, end: 1 },
         },
       ],
-      edits: [],
+      edits: [{ segment: { start: 1, end: 1 }, replacement: "\n  " }],
     });
   });
 

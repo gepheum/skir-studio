@@ -334,7 +334,8 @@ class JsonParser {
   }
 
   expectEnd(): void {
-    if (this.peekToken().jsonCode) {
+    const token = this.nextToken();
+    if (token.jsonCode) {
       this.errors.push({
         kind: "error",
         message: "expected: end",
