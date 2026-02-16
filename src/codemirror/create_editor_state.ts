@@ -84,18 +84,19 @@ function createEditorState(
           backgroundColor: theme.lighterBg,
           border: `1px solid ${theme.border}`,
           borderRadius: "4px",
-          padding: "4px 8px",
+          padding: "8px 12px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-          fontSize: "12px",
-          lineHeight: "1.3",
+          fontSize: "14px",
+          lineHeight: "1.4",
           color: theme.foreground,
         },
         ".cm-tooltip.cm-tooltip-lint": {
           backgroundColor: theme.lighterBg,
           border: `1px solid ${theme.border}`,
           borderRadius: "4px",
-          padding: "4px 8px",
+          padding: "8px 12px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+          fontSize: "14px", // Ensure consistency
           color: theme.foreground,
         },
         ".cm-tooltip-lint .cm-diagnostic-error": {
