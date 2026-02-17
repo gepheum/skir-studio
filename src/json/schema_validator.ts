@@ -1,5 +1,4 @@
 import { primitiveSerializer } from "skir-client";
-import { parseJsonValue } from "./json_parser";
 import { toJson } from "./to_json";
 import type {
   FieldDefinition,
@@ -43,32 +42,6 @@ export function validateSchema(
     rootTypeHint: validator.rootTypeHint,
     pathToTypeHint: pathToTypeHint,
   };
-}
-
-export function validateOrThrowError(
-  jsonCode: string,
-  schema: TypeDefinition,
-): void {
-  // TODO: show line/col numbers in error messages instead of position
-
-  const parseResult = parseJsonValue(jsonCode);
-  if (parseResult.errors.length > 0) {
-    const firstError = parseResult.errors[0];
-    const { message, segment } = firstError;
-    throw new Error(`JSON parsing error at ${segment.start}: ${message}`);
-  }
-
-  if (!parseResult.value) {
-    throw new Error("JSON parsing failed");
-  }
-
-  const validationResult = validateSchema(parseResult.value, schema);
-  const { errors } = validationResult;
-  if (errors.length) {
-    const firstError = errors[0];
-    const { message, segment } = firstError;
-    throw new Error(`Schema validation error at ${segment.start}: ${message}`);
-  }
 }
 
 class SchemaValidator {

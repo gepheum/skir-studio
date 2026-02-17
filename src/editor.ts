@@ -51,6 +51,14 @@ export class Editor extends LitElement {
     }
   }
 
+  get view(): EditorView {
+    if (this.editor.kind === "view") {
+      return this.editor.value;
+    } else {
+      throw new Error("Editor view not yet initialized");
+    }
+  }
+
   private editor:
     | {
         kind: "view";

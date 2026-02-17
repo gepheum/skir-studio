@@ -7,9 +7,10 @@ import {
   createReqEditorState,
   createRespEditorState,
 } from "./codemirror/create_editor_state.js";
+import { ensureJsonState } from "./codemirror/json_state.js";
 import "./editor.js";
 import { Editor } from "./editor.js";
-import { validateOrThrowError } from "./json/schema_validator.js";
+import { toJson } from "./json/to_json.js";
 import type { Json, TypeDefinition } from "./json/types.js";
 
 @customElement("skir-studio-app")
@@ -701,9 +702,22 @@ export class App extends LitElement {
     const { method } = selectedMethod;
     selectedMethod.response = { kind: "loading" };
     try {
-      const reqJsonCode = requestEditor.state.doc.toString();
-      validateOrThrowError(reqJsonCode, method.request);
-      const reqJson = JSON.parse(reqJsonCode);
+      const jsonState = ensureJsonState(requestEditor.view, method.request);
+
+      const errors = jsonState.parseResult.errors.concat(
+        jsonState.validationResult?.errors ?? [],
+      );
+      if (errors.length > 0) {
+        const firstError = errors[0];
+        const line = requestEditor.state.doc.lineAt(firstError.segment.start);
+        const lineNumber = line.number; // 1-based
+        const columnNumber = firstError.segment.start - line.from + 1;
+        throw new Error(
+          `Line ${lineNumber}, column ${columnNumber}: ${firstError.message}`,
+        );
+      }
+
+      const reqJson = toJson(jsonState.parseResult.value!);
 
       let fetchUrl: string;
       let fetchOptions: RequestInit;
