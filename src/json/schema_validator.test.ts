@@ -184,7 +184,7 @@ describe("schema_validator", () => {
     const result = validateSchema(parse('"Unknown"'), schema);
     expect(result.errors).toMatch([
       {
-        message: "Unknown enumerator",
+        message: "Unknown variant",
       },
     ]);
   });

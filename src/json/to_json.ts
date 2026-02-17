@@ -60,7 +60,7 @@ export function makeJsonTemplate(
         case "hash64":
           return "0";
         case "timestamp":
-          return { unix_millis: 0 };
+          return { unix_millis: 0, formatted: "1970-01-01T00:00:00Z" };
         case "string":
         case "bytes":
           return "";

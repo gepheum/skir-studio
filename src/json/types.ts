@@ -210,6 +210,13 @@ export type VariantDefinition = {
 // SCHEMA VALIDATION
 // -----------------------------------------------------------------------------
 
+export interface ValidationResult {
+  readonly errors: JsonError[];
+  readonly hints: Hint[];
+  readonly rootTypeHint: TypeHint | undefined;
+  readonly pathToTypeHint: ReadonlyMap<Path, TypeHint>;
+}
+
 export interface TypeHint {
   readonly segment: Segment;
   readonly message: string | readonly string[];
@@ -228,11 +235,4 @@ export type Hint =
 
 export interface MutableTypeHint extends TypeHint {
   readonly childHints: TypeHint[];
-}
-
-export interface ValidationResult {
-  readonly errors: JsonError[];
-  readonly hints: Hint[];
-  readonly rootTypeHint: TypeHint | undefined;
-  readonly pathToTypeHint: ReadonlyMap<Path, TypeHint>;
 }

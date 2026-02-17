@@ -116,6 +116,22 @@ function createEditorState(
         ".cm-diagnostic-textarea[readonly]": {
           backgroundColor: theme.background,
         },
+        ".cm-diagnostic-input": {
+          backgroundColor: theme.lighterBg,
+          borderColor: theme.border,
+          color: theme.foreground,
+        },
+        ".cm-diagnostic-button": {
+          backgroundColor: theme.lighterBg,
+          borderColor: theme.border,
+          color: theme.foreground,
+        },
+        ".cm-diagnostic-button:hover": {
+          backgroundColor: theme.border,
+        },
+        ".cm-diagnostic-error-message": {
+          color: theme.error,
+        },
         ".diagnostic-row + .diagnostic-row": {
           borderTopColor: theme.border,
         },
@@ -157,6 +173,7 @@ function createEditorState(
         ".cm-diagnostic-label": {
           whiteSpace: "nowrap",
           fontWeight: "500",
+          minWidth: "64px",
         },
         ".cm-diagnostic-textarea": {
           flex: "1",
@@ -171,6 +188,38 @@ function createEditorState(
         },
         ".cm-diagnostic-textarea[readonly]": {
           cursor: "default",
+        },
+        ".cm-diagnostic-input": {
+          padding: "3px 6px",
+          border: "1px solid",
+          borderRadius: "3px",
+          fontSize: "12px",
+          fontFamily: "'JetBrains Mono', monospace",
+          boxSizing: "border-box",
+          width: "100%",
+        },
+        ".cm-diagnostic-button": {
+          padding: "3px 12px",
+          border: "1px solid",
+          borderRadius: "3px",
+          fontSize: "12px",
+          fontFamily: "'JetBrains Mono', monospace",
+          cursor: "pointer",
+          boxSizing: "border-box",
+        },
+        ".cm-diagnostic-button:active": {
+          transform: "translateY(1px)",
+        },
+        ".cm-diagnostic-error-message": {
+          fontSize: "11px",
+          marginTop: "2px",
+          fontWeight: "500",
+        },
+        ".cm-timestamp-field": {
+          display: "flex",
+          flexDirection: "column",
+          gap: "2px",
+          flex: "1",
         },
         ".cm-tooltip-lint .cm-diagnostic": {
           padding: "0",

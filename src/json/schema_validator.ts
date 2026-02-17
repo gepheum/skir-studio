@@ -147,7 +147,12 @@ class SchemaValidator {
       }
       case "primitive": {
         const primitiveType = schema.value;
-        if (hasPrimitiveType(value, primitiveType)) {
+        if (primitiveType === "timestamp") {
+          if (this.validateTimestamp(value)) {
+            pushTypeHint();
+            typeHintStack.pop();
+          }
+        } else if (hasPrimitiveType(value, primitiveType)) {
           pushTypeHint();
           typeHintStack.pop();
         } else {
@@ -220,7 +225,7 @@ class SchemaValidator {
               this.errors.push({
                 kind: "error",
                 segment: value.segment,
-                message: "Unknown enumerator",
+                message: "Unknown variant",
               });
             }
           } else {
@@ -267,7 +272,7 @@ class SchemaValidator {
       this.errors.push({
         kind: "error",
         segment: kindKv.value.segment,
-        message: "Expected: lowercase enumerator",
+        message: "Expected: lowercase variant name",
       });
       return;
     }
@@ -276,7 +281,7 @@ class SchemaValidator {
       this.errors.push({
         kind: "error",
         segment: kindKv.value.segment,
-        message: "Unknown enumerator",
+        message: "Unknown variant",
       });
       return;
     }
@@ -289,12 +294,107 @@ class SchemaValidator {
       });
       return;
     }
+    for (const key of object.allKeys) {
+      if (key.key !== "kind" && key.key !== "value") {
+        this.errors.push({
+          kind: "error",
+          segment: key.keySegment,
+          message: "Unexpected entry",
+        });
+      }
+    }
     const path: Path = {
       kind: "variant-value",
       variantName: variantDef.name,
       enumPath: enumPath,
     };
     this.validate(valueKv.value, path, variantDef.type!);
+  }
+
+  private validateTimestamp(value: JsonValue): boolean {
+    if (value.kind !== "object") {
+      this.errors.push({
+        kind: "error",
+        segment: value.firstToken,
+        message: "Expected: timestamp",
+      });
+      return false;
+    }
+    const unixMillisKv = value.keyValues["unix_millis"];
+    if (!unixMillisKv) {
+      this.errors.push({
+        kind: "error",
+        segment: value.firstToken,
+        message: "Missing: 'unix_millis'",
+      });
+      return true;
+    }
+    if (
+      unixMillisKv.value.kind !== "literal" ||
+      unixMillisKv.value.type !== "number"
+    ) {
+      this.errors.push({
+        kind: "error",
+        segment: unixMillisKv.value.firstToken,
+        message: "Expected: number",
+      });
+      return true;
+    }
+    const unixMillis = toJson(unixMillisKv.value) as number;
+    if (unixMillis < -8640000000000000 || 8640000000000000 < unixMillis) {
+      this.errors.push({
+        kind: "error",
+        segment: unixMillisKv.value.firstToken,
+        message: "Timestamp out of range",
+      });
+      return true;
+    }
+    // At this point: the timestamp is technically valid.
+    const formatted = value.keyValues["formatted"];
+    if (!formatted) {
+      return true;
+    }
+    if (
+      formatted.value.kind !== "literal" ||
+      formatted.value.type !== "string"
+    ) {
+      this.errors.push({
+        kind: "error",
+        segment: formatted.value.firstToken,
+        message: "Expected: string",
+      });
+      return true;
+    }
+    const formattedStr = toJson(formatted.value) as string;
+    if (formattedStr === "n/a") {
+      return true;
+    }
+    const parsedMillis = Date.parse(formattedStr);
+    if (Number.isNaN(parsedMillis)) {
+      this.errors.push({
+        kind: "error",
+        segment: formatted.value.firstToken,
+        message: "Invalid ISO 8601 date string",
+      });
+      return true;
+    }
+    if (parsedMillis !== unixMillis) {
+      this.errors.push({
+        kind: "error",
+        segment: formatted.value.firstToken,
+        message: "Does not match 'unix_millis'",
+      });
+    }
+    for (const key of value.allKeys) {
+      if (key.key !== "unix_millis" && key.key !== "formatted") {
+        this.errors.push({
+          kind: "error",
+          segment: key.keySegment,
+          message: "Unexpected entry",
+        });
+      }
+    }
+    return true;
   }
 }
 
@@ -362,14 +462,6 @@ function hasPrimitiveType(
     case "hash64": {
       return isInteger(value, 0n, 18446744073709551615n);
     }
-    case "timestamp": {
-      try {
-        primitiveSerializer("timestamp").fromJson(toJson(value));
-        return true;
-      } catch {
-        return false;
-      }
-    }
     case "float32":
     case "float64": {
       return isFloat(value);
@@ -387,6 +479,10 @@ function hasPrimitiveType(
       } catch {
         return false;
       }
+    }
+    case "timestamp": {
+      // Case handled separately in validate()
+      throw new Error();
     }
   }
 }

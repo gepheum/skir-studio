@@ -81,6 +81,9 @@ export function enterKeyHandler(schema: TypeDefinition): Extension {
             // Enum
             codeToInsert = ['"kind": "",', '"value": {}'].join("\n");
           }
+        } else if (type.kind === "timestamp") {
+          codeToInsert =
+            '"unix_millis": 0,\n"formatted": "1970-01-01T00:00:00.000Z"';
         } else {
           const _: never = type;
           throw new Error(_);
@@ -116,14 +119,14 @@ function findTypeByLeftBracketPos(
   jsonValue: JsonValue,
   leftBracketPos: number,
   idToRecordDef: { [id: string]: RecordDefinition },
-): ArrayTypeSignature | RecordTypeSignature | null {
-  const { expectedType } = jsonValue;
+): ArrayTypeSignature | RecordTypeSignature | { kind: "timestamp" } | null {
+  let { expectedType } = jsonValue;
   if (!expectedType) {
     return null;
   }
-  const actualType =
-    expectedType.kind === "optional" ? expectedType.value : expectedType;
-  void actualType;
+  if (expectedType.kind === "optional") {
+    expectedType = expectedType.value;
+  }
   switch (jsonValue.kind) {
     case "array": {
       if (expectedType.kind !== "array") {
@@ -150,12 +153,15 @@ function findTypeByLeftBracketPos(
       return null;
     }
     case "object": {
+      if (
+        expectedType.kind === "primitive" &&
+        expectedType.value === "timestamp" &&
+        leftBracketPos === jsonValue.firstToken.start
+      ) {
+        return { kind: "timestamp" };
+      }
       if (expectedType.kind !== "record") {
         return null;
-      }
-      if (leftBracketPos === jsonValue.firstToken.start) {
-        // We have a match
-        return expectedType;
       }
       // If no match, we can continue searching in the values.
       const recordDef = idToRecordDef[expectedType.value];
