@@ -40,8 +40,6 @@
     "@codemirror/language": "^6.11.2",
     "@uiw/codemirror-theme-tokyo-night": "^4.25.4",
     "codemirror": "^6.0.2",
-    "codemirror-json5": "^1.0.3",
-    "json5": "^2.2.3",
     "lit": "^3.2.0",
     "nanoevents": "^9.1.0",
     "skir-client": "^1.0.9"
