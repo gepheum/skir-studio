@@ -65,7 +65,7 @@ function getStringControlRows(
   controlsRow.className = "cm-diagnostic-controls";
 
   const label = document.createElement("span");
-  label.className = "cm-diagnostic-label";
+  // label.className = "cm-diagnostic-label";
   label.textContent = "Value:";
 
   const textarea = document.createElement("textarea");

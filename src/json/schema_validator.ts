@@ -78,12 +78,17 @@ class SchemaValidator {
   private readonly typeHintStack: MutableTypeHint[] = [];
   rootTypeHint: TypeHint | undefined;
 
-  validate(value: JsonValue, path: Path, schema: TypeSignature): void {
+  validate(
+    value: JsonValue,
+    path: Path,
+    schema: TypeSignature,
+    optionalSchema?: TypeSignature,
+  ): void {
     const { idToRecordDef, typeHintStack } = this;
     value.expectedType = schema;
     // For every call to pushTypeHint() there emust be one call to typeHintStack.pop()
     const pushTypeHint = (): void => {
-      const typeDesc = getTypeDesc(schema);
+      const typeDesc = getTypeDesc(optionalSchema ?? schema);
       const typeDoc = getTypeDoc(schema, idToRecordDef);
       const message = [typeDesc];
       if (typeDoc) {
@@ -141,7 +146,7 @@ class SchemaValidator {
           pushTypeHint();
           typeHintStack.pop();
         } else {
-          this.validate(value, path, schema.value);
+          this.validate(value, path, schema.value, schema);
         }
         break;
       }

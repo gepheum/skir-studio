@@ -163,6 +163,10 @@ function findTypeByLeftBracketPos(
       if (expectedType.kind !== "record") {
         return null;
       }
+      if (leftBracketPos === jsonValue.firstToken.start) {
+        // We have a match
+        return expectedType;
+      }
       // If no match, we can continue searching in the values.
       const recordDef = idToRecordDef[expectedType.value];
       if (recordDef.kind === "struct") {
