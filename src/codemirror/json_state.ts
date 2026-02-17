@@ -1,4 +1,9 @@
-import { Extension, StateEffect, StateField } from "@codemirror/state";
+import {
+  Extension,
+  StateEffect,
+  StateField,
+  Transaction,
+} from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { parseJsonValue } from "../json/json_parser";
 import { validateSchema } from "../json/schema_validator";
@@ -80,21 +85,26 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
 
         update(update: ViewUpdate): void {
           if (update.docChanged) {
-            this.scheduleUpdate();
+            const isUndo = update.transactions.some(
+              (tr) =>
+                tr.annotation(Transaction.userEvent) === "undo" ||
+                tr.annotation(Transaction.userEvent) === "redo",
+            );
+            this.scheduleUpdate(isUndo ? "from-undo" : undefined);
           }
         }
 
-        scheduleUpdate(): void {
+        scheduleUpdate(fromUndo?: "from-undo"): void {
           if (this.timeout !== null) {
             clearTimeout(this.timeout);
           }
           this.timeout = window.setTimeout(() => {
-            this.parseJson();
+            this.parseJson(fromUndo);
             this.timeout = null;
           }, 200);
         }
 
-        parseJson(): void {
+        parseJson(fromUndo: "from-undo" | undefined): void {
           const source = this.view.state.doc.toString();
           const parseResult = parseJsonValue(source);
 
@@ -112,8 +122,13 @@ export function debouncedJsonParser(schema: TypeDefinition): Extension[] {
             );
           };
 
-          // Apply edits if there are any and if there is no error.
+          // Apply edits if all these conditions are satisfied:
+          //   - no error
+          //   - the cursor is not inside any of the edited segments, to avoid
+          //       disrupting the user while they're typing
+          //   - the update is not triggered by an undo operation
           if (
+            !fromUndo &&
             parseResult.edits.length &&
             parseResult.errors.length <= 0 &&
             !cursorInsideEdit()
