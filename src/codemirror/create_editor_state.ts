@@ -52,9 +52,11 @@ function createEditorState(
       EditorState.readOnly.of(editable === "read-only"),
       enterKeyHandler(schema),
       basicSetup,
-      EditorState.languageData.of(() => [{
-        closeBrackets: { before: ",]}" }
-      }]),
+      EditorState.languageData.of(() => [
+        {
+          closeBrackets: { before: ",]}" },
+        },
+      ]),
       closeBrackets(),
       tokyoNight,
       json(),
