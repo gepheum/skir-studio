@@ -397,19 +397,19 @@ function extractItemKey(
     }
     value = kv.value;
   }
-  switch (item.kind) {
+  switch (value.kind) {
     case "literal": {
-      switch (item.type) {
+      switch (value.type) {
         case "string":
         case "number":
         case "boolean":
-          return item.jsonCode;
+          return value.jsonCode;
       }
       // Error
       return null;
     }
     case "object": {
-      const kv = item.keyValues["unix_millis"];
+      const kv = value.keyValues["unix_millis"];
       if (kv && kv.value.kind === "literal" && kv.value.type === "number") {
         return kv.value.jsonCode;
       } else {

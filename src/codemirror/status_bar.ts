@@ -113,7 +113,7 @@ class NavigatorNodesBuilder {
       case "array-item": {
         this.appendNodesForPath(path.arrayPath);
         if (path.key) {
-          link.append(`$[${path.index}|${path.key}]`);
+          link.append(`[${path.index}|${path.key}]`);
         } else {
           link.append(`[${path.index}]`);
         }
