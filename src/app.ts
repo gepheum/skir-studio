@@ -71,6 +71,7 @@ export class App extends LitElement {
     .header-text {
       background: linear-gradient(to right, #7aa2f7, #bb9af7);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 30px rgba(122, 162, 247, 0.3);
     }
@@ -145,6 +146,7 @@ export class App extends LitElement {
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active {
       -webkit-box-shadow: 0 0 0 30px var(--bg-dark) inset !important;
+      box-shadow: 0 0 0 30px var(--bg-dark) inset !important;
       -webkit-text-fill-color: var(--fg) !important;
       transition: background-color 5000s ease-in-out 0s; /* Delay the background color change */
       caret-color: var(--fg);

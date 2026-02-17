@@ -185,7 +185,7 @@ function getTimestampControlRows(
   row3.appendChild(nowButton);
 
   // Helper function to update the editor
-  const updateEditor = (millis: number, formatted: string) => {
+  const updateEditor = (millis: number, formatted: string): void => {
     const value = typeHint.valueContext!.value;
 
     // Check if both keys exist in the object
