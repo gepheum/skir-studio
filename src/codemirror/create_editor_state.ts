@@ -1,4 +1,4 @@
-import { autocompletion } from "@codemirror/autocomplete";
+import { autocompletion, closeBrackets } from "@codemirror/autocomplete";
 import { json } from "@codemirror/lang-json";
 import { linter, lintGutter } from "@codemirror/lint";
 import { EditorState } from "@codemirror/state";
@@ -52,6 +52,10 @@ function createEditorState(
       EditorState.readOnly.of(editable === "read-only"),
       enterKeyHandler(schema),
       basicSetup,
+      EditorState.languageData.of(() => [{
+        closeBrackets: { before: ",]}" }
+      }]),
+      closeBrackets(),
       tokyoNight,
       json(),
       debouncedJsonParser(schema),
