@@ -1,6 +1,6 @@
 import { Diagnostic } from "@codemirror/lint";
 import { EditorView } from "@codemirror/view";
-import { Hint, JsonError, TypeHint } from "../json/types";
+import { Hint, JsonError, JsonLiteral, TypeHint } from "../json/types";
 import { ensureJsonState, jsonStateField } from "./json_state";
 
 export function jsonLinter(
@@ -47,19 +47,15 @@ function errorToDiagnostic(error: JsonError): Diagnostic {
 
 function getStringControlRows(
   view: EditorView,
-  typeHint: Hint,
+  typeHint: TypeHint,
+  value: JsonLiteral,
   editable: "editable" | "read-only",
 ): HTMLDivElement[] {
   const headerRow = document.createElement("div");
   headerRow.textContent = typeHint.message as string;
 
-  const jsonCode = view.state.doc.toString();
-  const jsonString = jsonCode.substring(
-    typeHint.segment.start,
-    typeHint.segment.end,
-  );
-
-  const parsedValue = JSON.parse(jsonString) as string;
+  const jsonCode = value.jsonCode;
+  const parsedValue = JSON.parse(jsonCode) as string;
 
   const controlsRow = document.createElement("div");
   controlsRow.className = "cm-diagnostic-controls";
@@ -326,7 +322,12 @@ function hintToDiagnostic(
         typeHint.valueContext.value.type === "string"
       ) {
         // Render a string editing control for string hints.
-        rows = getStringControlRows(view, typeHint, editable);
+        rows = getStringControlRows(
+          view,
+          typeHint,
+          typeHint.valueContext.value,
+          editable,
+        );
       } else if (
         (message === "timestamp" || message === "timestamp?") &&
         typeHint.valueContext &&
