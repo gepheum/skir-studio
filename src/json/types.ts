@@ -236,3 +236,19 @@ export type Hint =
 export interface MutableTypeHint extends TypeHint {
   readonly childHints: TypeHint[];
 }
+
+// -----------------------------------------------------------------------------
+// METHOD LIST
+// -----------------------------------------------------------------------------
+
+export interface MethodList {
+  readonly methods: readonly Method[];
+}
+
+export interface Method {
+  readonly method: string;
+  readonly number: number | string;
+  readonly request: TypeDefinition;
+  readonly response: TypeDefinition;
+  readonly doc?: string;
+}

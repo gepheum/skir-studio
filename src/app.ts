@@ -11,7 +11,8 @@ import { ensureJsonState } from "./codemirror/json_state.js";
 import "./editor.js";
 import { Editor } from "./editor.js";
 import { toJson } from "./json/to_json.js";
-import type { Json, TypeDefinition } from "./json/types.js";
+import type { Json, Method, MethodList } from "./json/types.js";
+import { generateLlmsTxt } from "./llms/llms_doc_generator.js";
 
 @customElement("skir-studio-app")
 export class App extends LitElement {
@@ -445,6 +446,157 @@ export class App extends LitElement {
         font-size: 1.5rem;
       }
     }
+
+    /* ------------------------------------------------------------------ */
+    /* llms.txt button + panel                                             */
+    /* ------------------------------------------------------------------ */
+
+    .llms-txt-button {
+      margin-left: auto;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.75rem;
+      background: rgba(122, 162, 247, 0.07);
+      border-color: rgba(122, 162, 247, 0.22);
+      color: var(--accent);
+      font-family: "JetBrains Mono", monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .llms-txt-button:hover {
+      background: rgba(122, 162, 247, 0.15);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: 0 0 12px rgba(122, 162, 247, 0.2);
+    }
+
+    .llms-doc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 10, 0.65);
+      z-index: 100;
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+
+    .llms-doc-panel {
+      width: 55%;
+      min-width: 440px;
+      max-width: 880px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .llms-doc-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: #0d0e17;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      font-family: "JetBrains Mono", monospace;
+      flex-shrink: 0;
+    }
+
+    .llms-close-button {
+      padding: 0.1rem 0.45rem;
+      font-size: 1.1rem;
+      line-height: 1;
+      background: transparent;
+      border-color: transparent;
+      color: #565f89;
+      transform: none;
+    }
+
+    .llms-close-button:hover {
+      background: rgba(247, 118, 142, 0.1);
+      border-color: rgba(247, 118, 142, 0.3);
+      color: var(--error);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .llms-doc-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .llms-doc-intro {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: #9aa5ce;
+    }
+
+    .llms-doc-intro a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .llms-doc-intro a:hover {
+      text-decoration: underline;
+    }
+
+    .llms-doc-auth-reminder {
+      padding: 0.75rem 1rem;
+      background: rgba(224, 175, 104, 0.07);
+      border: 1px solid rgba(224, 175, 104, 0.25);
+      border-left: 3px solid #e0af68;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: #e0af68;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .llms-doc-auth-reminder code {
+      font-family: "JetBrains Mono", monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.85em;
+      width: fit-content;
+    }
+
+    .llms-doc-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .llms-doc-actions button {
+      padding: 0.35rem 0.9rem;
+      font-size: 0.78rem;
+    }
+
+    .llms-doc-content {
+      margin: 0;
+      padding: 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--fg);
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-x: auto;
+    }
   `;
 
   override render(): TemplateResult {
@@ -456,6 +608,7 @@ export class App extends LitElement {
         </a>
       </h1>
       ${this.renderServiceUrlSelector()} ${this.renderContent()}
+      ${this.llmsDocPanelOpen ? this.renderLlmsDocPanel() : ""}
     </div>`;
   }
 
@@ -611,7 +764,89 @@ export class App extends LitElement {
             <div class="tooltip">${this.selectedMethod.method.doc}</div>
           </div>`
         : ""}
+      <button
+        class="llms-txt-button"
+        @click=${() => {
+          this.llmsDocPanelOpen = true;
+        }}
+      >
+        llms.txt
+      </button>
     </div>`;
+  }
+
+  private renderLlmsDocPanel(): TemplateResult {
+    if (this.methodList.kind !== "ok") return html``;
+
+    const { serviceUrl, authorizationHeader } = this.serviceSpec;
+    const hasAuth = authorizationHeader.trim() !== "";
+    const methodList: MethodList = {
+      methods: this.methodList.methods.map((b) => b.method),
+    };
+    const text = generateLlmsTxt(
+      methodList,
+      serviceUrl,
+      hasAuth ? "auth" : "no-auth",
+    );
+
+    const onCopy = async () => {
+      await navigator.clipboard.writeText(text);
+      this.llmsDocCopied = true;
+      setTimeout(() => {
+        this.llmsDocCopied = false;
+      }, 2000);
+    };
+
+    const onDownload = () => {
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "llms.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const onClose = () => {
+      this.llmsDocPanelOpen = false;
+    };
+
+    return html`
+      <div
+        class="llms-doc-overlay"
+        @click=${(e: Event) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        <div class="llms-doc-panel">
+          <div class="llms-doc-panel-header">
+            <span>llms.txt</span>
+            <button class="llms-close-button" @click=${onClose}>×</button>
+          </div>
+          <div class="llms-doc-panel-body">
+            <p class="llms-doc-intro">
+              Pass this text file to your AI assistant's context to let it
+              understand and call this service's API directly.
+            </p>
+            ${hasAuth
+              ? html`<div class="llms-doc-auth-reminder">
+                  ⚠&nbsp; This service requires bearer token authentication. The
+                  AI agent will need the token set in the shell environment
+                  where it runs commands:
+                  <code>export MY_API_BEARER_TOKEN="your-token-here"</code>
+                </div>`
+              : ""}
+            <div class="llms-doc-actions">
+              <button @click=${onDownload}>⬇ Download</button>
+              <button @click=${onCopy}>
+                ${this.llmsDocCopied ? "✓ Copied!" : "Copy"}
+              </button>
+            </div>
+            <pre class="llms-doc-content">${text}</pre>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   protected override firstUpdated(): void {
@@ -790,6 +1025,11 @@ export class App extends LitElement {
   }
 
   @state()
+  private llmsDocPanelOpen = false;
+  @state()
+  private llmsDocCopied = false;
+
+  @state()
   private serviceSpec: ServiceSpec = {
     serviceUrl: getDefaultServiceUrl(),
     authorizationHeader: "",
@@ -815,18 +1055,6 @@ export class App extends LitElement {
 interface ServiceSpec {
   serviceUrl: string;
   authorizationHeader: string;
-}
-
-interface Method {
-  method: string;
-  number: number;
-  request: TypeDefinition;
-  response: TypeDefinition;
-  doc?: string;
-}
-
-interface MethodList {
-  methods: Method[];
 }
 
 type ResponseState =
