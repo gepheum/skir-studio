@@ -7,7 +7,7 @@ import type {
   StructDefinition,
   TypeDefinition,
   TypeSignature,
-} from "../json/types.js";
+} from "skir-codemirror-plugin";
 
 export type { Method, MethodList };
 

@@ -1,17 +1,18 @@
 import { EditorState } from "@codemirror/state";
 import { css, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import {
+  createEditorState,
+  ensureJsonState,
+  toJson,
+  type Json,
+  type Method,
+  type MethodList,
+} from "skir-codemirror-plugin";
 
 import { classMap } from "lit/directives/class-map.js";
-import {
-  createReqEditorState,
-  createRespEditorState,
-} from "./codemirror/create_editor_state.js";
-import { ensureJsonState } from "./codemirror/json_state.js";
 import "./editor.js";
 import { Editor } from "./editor.js";
-import { toJson } from "./json/to_json.js";
-import type { Json, Method, MethodList } from "./json/types.js";
 import { generateLlmsTxt } from "./llms/llms_doc_generator.js";
 
 @customElement("skir-studio-app")
@@ -887,7 +888,9 @@ export class App extends LitElement {
       }
       const methods = methodList.methods.map((method) => ({
         method,
-        reqEditorState: createReqEditorState(method.request),
+        reqEditorState: createEditorState({
+          schema: method.request,
+        }),
         response: { kind: "zero-state" } as ResponseState,
       }));
       methods.sort((a, b) => a.method.method.localeCompare(b.method.method));
@@ -1005,7 +1008,11 @@ export class App extends LitElement {
         throw new Error(errorMessage);
       }
       const data = (await response.json()) as Json;
-      const respEditorState = createRespEditorState(data, method.response);
+      const respEditorState = createEditorState({
+        schema: method.response,
+        readOnly: true,
+        json: data,
+      });
       selectedMethod.response = {
         kind: "ok",
         response: data,

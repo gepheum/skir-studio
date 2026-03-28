@@ -1,6 +1,6 @@
 {
   "name": "skir-studio",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
   "homepage": "https://github.com/gepheum/skir-studio#readme",
   "bugs": {
@@ -35,14 +35,10 @@
     "prepublishOnly": "npm run bundle"
   },
   "dependencies": {
-    "@codemirror/buildhelper": "^1.0.2",
-    "@codemirror/lang-json": "^6.0.2",
-    "@codemirror/language": "^6.11.2",
-    "@uiw/codemirror-theme-tokyo-night": "^4.25.4",
-    "codemirror": "^6.0.2",
     "lit": "^3.2.0",
     "nanoevents": "^9.1.0",
-    "skir-client": "^1.0.11"
+    "skir-client": "^1.0.11",
+    "skir-codemirror-plugin": "^1.0.1"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.6.3",
@@ -72,7 +68,8 @@
   },
   "overrides": {
     "diff": "^8.0.3",
-    "minimatch": "^10.2.1"
+    "minimatch": "^10.2.1",
+    "serialize-javascript": "^7.0.4"
   },
   "customElements": "custom-elements.json"
 }
