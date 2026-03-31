@@ -38,7 +38,7 @@
     "lit": "^3.2.0",
     "nanoevents": "^9.1.0",
     "skir-client": "^1.0.11",
-    "skir-codemirror-plugin": "^1.0.2"
+    "skir-codemirror-plugin": "^1.0.3"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.6.3",
