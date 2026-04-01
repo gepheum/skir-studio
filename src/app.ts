@@ -18,150 +18,211 @@ import { generateLlmsTxt } from "./llms/llms_doc_generator.js";
 @customElement("skir-studio-app")
 export class App extends LitElement {
   static override styles = css`
-    @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Press+Start+2P&display=swap");
 
     :host {
-      --bg-dark: #0a0b12;
-      --bg-panel: #13141f;
-      --bg-lighter: #1a1b26;
-      --border: #2f334d;
-      --fg: #c0caf5;
-      --accent: #7aa2f7;
-      --error: #f7768e;
-      --success: #9ece6a;
+      --bg: #f3f1e8;
+      --bg-panel: #fffdf7;
+      --bg-panel-2: #efecdf;
+      --ink: #111111;
+      --muted: #545454;
+      --line: #232323;
+      --line-bright: #000000;
+      --accent: #111111;
+      --accent-soft: #e7e3d6;
+      --warm-soft: #faf8f0;
+      --error-soft: #f5e9e9;
+      --ok-soft: #f3eee1;
 
       display: block;
-      height: 100vh;
+      position: relative;
+      min-height: 100vh;
       width: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif;
-      background: var(--bg-dark);
-      color: var(--fg);
+      font-family: "IBM Plex Mono", monospace;
+      background: radial-gradient(
+            circle at 18% 14%,
+            rgba(0, 0, 0, 0.14) 0,
+            transparent 2px
+          )
+          0 0 / 38px 38px,
+        radial-gradient(
+            circle at 74% 26%,
+            rgba(0, 0, 0, 0.08) 0,
+            transparent 1.5px
+          )
+          0 0 / 29px 29px,
+        linear-gradient(180deg, #fcfaf2 0%, var(--bg) 100%);
+      color: var(--ink);
       overflow: hidden;
     }
 
+    :host::before,
+    :host::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    :host::before {
+      background: linear-gradient(
+        180deg,
+        transparent,
+        rgba(0, 0, 0, 0.025) 45%,
+        transparent
+      );
+      opacity: 0.8;
+    }
+
+    :host::after {
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.035) 0,
+        rgba(0, 0, 0, 0.035) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      opacity: 0.1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     .app {
-      height: 100vh;
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-      background: var(--bg-dark);
-      margin: 0;
+      gap: 1rem;
     }
 
     h1 {
       margin: 0;
-      padding: 0.75rem 1.5rem;
-      background: #050505;
-      font-size: 1.1rem;
-      font-weight: 700;
-      border-bottom: 1px solid var(--border);
-      letter-spacing: 0.5px;
+      border: 2px solid var(--line-bright);
+      background: linear-gradient(180deg, #fffef8 0%, #f1ede0 100%);
+      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.12),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+      padding: 1rem 1.1rem;
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(0.96rem, 2vw, 1.35rem);
+      line-height: 1.45;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      z-index: 10;
-      position: relative;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
     }
 
     h1 a {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 1rem;
       color: inherit;
       text-decoration: none;
-      width: fit-content;
+      width: 100%;
     }
 
     .header-text {
-      background: linear-gradient(to right, #7aa2f7, #bb9af7);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(122, 162, 247, 0.3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .header-icon {
-      font-size: 1em;
-      line-height: 1;
+      width: 2.6rem;
+      height: 2.6rem;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--accent);
+      background: #ffffff;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.12);
+      font-size: 1.2rem;
     }
 
     .service-section {
-      display: flex;
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.75rem;
       align-items: end;
-      padding: 0.75rem 1rem;
+      padding: 0.95rem;
       background: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
+      border: 2px solid var(--line);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.03);
     }
 
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
-      min-width: 200px;
+      gap: 0.36rem;
+      min-width: 0;
       flex: 1;
     }
 
     .input-group.url-input {
       flex: 2;
-      min-width: 300px;
+      min-width: 0;
     }
 
     .button-group {
       display: flex;
       flex-direction: column;
-      min-width: 200px;
-      flex: 1;
+      min-width: 160px;
       justify-content: flex-end;
     }
 
     label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #787c99;
+      font-size: 0.72rem;
+      color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
     }
 
     input[type="text"],
     input[type="password"] {
-      padding: 0.5rem 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--fg);
-      font-family: inherit;
-      transition: all 0.2s ease;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: #fffef9;
+      color: var(--ink);
+      padding: 0.72rem 0.78rem;
+      font-size: 0.84rem;
+      font-family: "IBM Plex Mono", monospace;
+      outline: none;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
     }
 
     input[type="text"]:focus,
     input[type="password"]:focus {
-      outline: none;
       border-color: var(--accent);
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
     }
 
-    /* Prevent white background on Chrome autofill */
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 30px var(--bg-dark) inset !important;
-      box-shadow: 0 0 0 30px var(--bg-dark) inset !important;
-      -webkit-text-fill-color: var(--fg) !important;
-      transition: background-color 5000s ease-in-out 0s; /* Delay the background color change */
-      caret-color: var(--fg);
+      -webkit-box-shadow: 0 0 0 30px #fffef9 inset !important;
+      box-shadow: 0 0 0 30px #fffef9 inset !important;
+      -webkit-text-fill-color: var(--ink) !important;
+      caret-color: var(--ink);
     }
 
     .method-section {
-      padding: 0.5rem 1rem;
+      padding: 0.8rem 0.95rem;
       background: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
+      border: 2px solid var(--line);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.03);
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .doc-badge-wrapper {
@@ -175,19 +236,19 @@ export class App extends LitElement {
       justify-content: center;
       width: 18px;
       height: 18px;
-      background: var(--bg-lighter);
-      color: var(--accent);
-      border: 1px solid var(--border);
-      border-radius: 50%;
+      background: #fffef9;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 0;
       font-size: 0.7rem;
       font-weight: 600;
       cursor: help;
-      transition: all 0.2s ease;
+      transition: background-color 120ms ease, color 120ms ease;
     }
 
     .doc-badge-wrapper:hover .doc-badge {
       background: var(--accent);
-      color: var(--bg-dark);
+      color: #fff;
     }
 
     .doc-badge-wrapper .tooltip {
@@ -197,14 +258,14 @@ export class App extends LitElement {
       left: 50%;
       transform: translateX(-50%);
       margin-top: 0.5rem;
-      padding: 0.5rem;
-      background: var(--bg-lighter);
-      color: var(--fg);
-      border: 1px solid var(--border);
+      padding: 0.55rem 0.65rem;
+      background: var(--bg-panel);
+      color: var(--ink);
+      border: 1px solid var(--line);
       border-radius: 0;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1.45;
       white-space: pre-wrap;
       min-width: 250px;
       max-width: 400px;
@@ -212,7 +273,7 @@ export class App extends LitElement {
       opacity: 0;
       transition: opacity 0.2s ease, visibility 0.2s ease;
       font-family: inherit;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.12);
     }
 
     .doc-badge-wrapper .tooltip::before {
@@ -231,7 +292,7 @@ export class App extends LitElement {
       left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
-      border-bottom-color: var(--border);
+      border-bottom-color: var(--line);
     }
 
     .doc-badge-wrapper:hover .tooltip {
@@ -240,38 +301,40 @@ export class App extends LitElement {
     }
 
     select {
-      padding: 0.5rem 2.5rem 0.5rem 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      background-color: rgba(255, 255, 255, 0.03);
-      color: var(--fg);
+      width: min(460px, 100%);
+      padding: 0.72rem 2.3rem 0.72rem 0.78rem;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      font-size: 0.84rem;
+      background-color: #fffef9;
+      color: var(--ink);
       min-width: 200px;
       font-family: inherit;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c0caf5' d='M6 8.825L1.175 4 2.238 2.938 6 6.7 9.763 2.938 10.825 4z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111111' d='M6 8.825L1.175 4 2.238 2.938 6 6.7 9.763 2.938 10.825 4z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 1em top 50%;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
     }
 
     select:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-color: #565f89;
+      border-color: var(--line-bright);
     }
 
     select:focus {
-      outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
     }
 
     .content-section {
       flex: 1;
       display: flex;
       overflow: hidden;
-      background: var(--bg-dark);
+      background: var(--bg-panel);
+      border: 2px solid var(--line);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.03);
     }
 
     .request-panel,
@@ -281,8 +344,8 @@ export class App extends LitElement {
       min-width: 0;
       display: flex;
       flex-direction: column;
-      background: var(--bg-dark);
-      border-right: 1px solid var(--border);
+      background: #faf7ee;
+      border-right: 1px solid var(--line);
       box-sizing: border-box;
     }
 
@@ -291,32 +354,44 @@ export class App extends LitElement {
     }
 
     .panel-header {
-      padding: 0.5rem 1rem;
-      background: #13141f;
-      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 0.95rem;
+      background: repeating-linear-gradient(
+        180deg,
+        #f7f3e7 0,
+        #f7f3e7 2px,
+        var(--bg-panel-2) 2px,
+        var(--bg-panel-2) 4px
+      );
+      border-bottom: 1px solid var(--line-bright);
       font-weight: 600;
-      color: var(--fg);
+      color: var(--ink);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      min-height: 3rem;
+      min-height: 3.4rem;
+      height: 3.4rem;
       box-sizing: border-box;
-      font-size: 0.8rem;
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.66rem;
+      line-height: 1.4;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
     }
 
     .latency-display {
       font-weight: normal;
-      color: #565f89;
-      font-size: 0.75rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .panel-content {
       flex: 1;
       overflow: auto;
       min-height: 0;
-      background: var(--bg-dark);
+      background: #faf7ee;
     }
 
     skir-studio-editor {
@@ -326,63 +401,62 @@ export class App extends LitElement {
     }
 
     button {
-      padding: 0.5rem 1.5rem;
-      background: var(--bg-lighter);
-      color: var(--fg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      padding: 0.6rem 1rem;
+      background: #fffef9;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 0;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      font-family: inherit;
+      transition: background-color 120ms ease, border-color 120ms ease,
+        color 120ms ease;
+      font-family: "IBM Plex Mono", monospace;
     }
 
     button:hover {
-      background: var(--border);
-      color: white;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
     }
 
     button:active {
-      transform: translateY(0);
+      filter: brightness(0.98);
     }
 
     button:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+      background: #ece7da;
+      border-color: var(--line);
+      color: var(--muted);
     }
 
     .send-button {
-      background: rgba(158, 206, 106, 0.1);
-      border-color: rgba(158, 206, 106, 0.2);
-      color: var(--success);
-      padding: 0.35rem 1rem;
-      font-size: 0.8rem;
+      background: #fffef9;
+      border-color: var(--line);
+      color: var(--ink);
+      padding: 0.45rem 0.78rem;
+      font-size: 0.72rem;
     }
 
     .send-button:hover {
-      background: var(--success);
-      color: #000;
-      border-color: var(--success);
-      box-shadow: 0 0 15px rgba(158, 206, 106, 0.3);
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
     }
 
     .error {
       padding: 0.75rem 1rem;
-      background: rgba(247, 118, 142, 0.1);
-      color: var(--error);
-      border-left: 2px solid var(--error);
+      background: var(--error-soft);
+      color: var(--ink);
+      border: 1px solid var(--line);
       margin: 1rem;
       border-radius: 0;
       font-size: 0.8rem;
       word-wrap: break-word;
       overflow-wrap: break-word;
-      border-bottom: 1px solid var(--border);
     }
 
     .panel-content .error {
@@ -400,9 +474,9 @@ export class App extends LitElement {
       align-items: center;
       justify-content: center;
       padding: 2rem;
-      color: #565f89;
-      font-style: italic;
+      color: var(--muted);
       font-family: inherit;
+      background: var(--ok-soft);
     }
 
     .zero-state {
@@ -410,10 +484,14 @@ export class App extends LitElement {
       align-items: center;
       justify-content: center;
       padding: 3rem 2rem;
-      color: #565f89;
+      color: var(--muted);
       text-align: center;
       font-size: 0.8rem;
       font-family: inherit;
+      border: 2px solid var(--line);
+      background: var(--bg-panel);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.03);
     }
 
     @media (max-width: 1024px) {
@@ -424,7 +502,7 @@ export class App extends LitElement {
       .request-panel,
       .response-panel {
         border-right: none;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--line);
       }
 
       .response-panel {
@@ -434,7 +512,7 @@ export class App extends LitElement {
 
     @media (max-width: 768px) {
       .service-section {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         align-items: stretch;
       }
 
@@ -443,8 +521,7 @@ export class App extends LitElement {
       }
 
       h1 {
-        padding: 1rem;
-        font-size: 1.5rem;
+        padding: 0.9rem;
       }
     }
 
@@ -454,26 +531,25 @@ export class App extends LitElement {
 
     .llms-txt-button {
       margin-left: auto;
-      padding: 0.3rem 0.8rem;
-      font-size: 0.75rem;
-      background: rgba(122, 162, 247, 0.07);
-      border-color: rgba(122, 162, 247, 0.22);
+      padding: 0.45rem 0.78rem;
+      font-size: 0.7rem;
+      background: #fffef9;
+      border-color: var(--line);
       color: var(--accent);
-      font-family: "JetBrains Mono", monospace;
-      letter-spacing: 0.02em;
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: 0.08em;
     }
 
     .llms-txt-button:hover {
-      background: rgba(122, 162, 247, 0.15);
+      background: var(--accent);
       border-color: var(--accent);
-      color: white;
-      box-shadow: 0 0 12px rgba(122, 162, 247, 0.2);
+      color: #fff;
     }
 
     .llms-doc-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(5, 5, 10, 0.65);
+      background: rgba(17, 17, 17, 0.4);
       z-index: 100;
       display: flex;
       align-items: stretch;
@@ -485,10 +561,11 @@ export class App extends LitElement {
       min-width: 440px;
       max-width: 880px;
       background: var(--bg-panel);
-      border-left: 1px solid var(--border);
+      border-left: 2px solid var(--line);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: -6px 0 0 rgba(0, 0, 0, 0.08);
     }
 
     .llms-doc-panel-header {
@@ -496,14 +573,20 @@ export class App extends LitElement {
       align-items: center;
       justify-content: space-between;
       padding: 0.65rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      background: #0d0e17;
-      font-size: 0.78rem;
+      border-bottom: 1px solid var(--line-bright);
+      background: repeating-linear-gradient(
+        180deg,
+        #f7f3e7 0,
+        #f7f3e7 2px,
+        var(--bg-panel-2) 2px,
+        var(--bg-panel-2) 4px
+      );
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--accent);
-      font-family: "JetBrains Mono", monospace;
+      font-family: "Press Start 2P", monospace;
       flex-shrink: 0;
     }
 
@@ -512,17 +595,14 @@ export class App extends LitElement {
       font-size: 1.1rem;
       line-height: 1;
       background: transparent;
-      border-color: transparent;
-      color: #565f89;
-      transform: none;
+      border-color: var(--line);
+      color: var(--muted);
     }
 
     .llms-close-button:hover {
-      background: rgba(247, 118, 142, 0.1);
-      border-color: rgba(247, 118, 142, 0.3);
-      color: var(--error);
-      transform: none;
-      box-shadow: none;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }
 
     .llms-doc-panel-body {
@@ -538,7 +618,7 @@ export class App extends LitElement {
       margin: 0;
       font-size: 0.8rem;
       line-height: 1.7;
-      color: #9aa5ce;
+      color: var(--muted);
     }
 
     .llms-doc-intro a {
@@ -552,23 +632,23 @@ export class App extends LitElement {
 
     .llms-doc-auth-reminder {
       padding: 0.75rem 1rem;
-      background: rgba(224, 175, 104, 0.07);
-      border: 1px solid rgba(224, 175, 104, 0.25);
-      border-left: 3px solid #e0af68;
-      border-radius: 4px;
+      background: var(--error-soft);
+      border: 1px solid var(--line);
+      border-radius: 0;
       font-size: 0.78rem;
       line-height: 1.7;
-      color: #e0af68;
+      color: var(--ink);
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
 
     .llms-doc-auth-reminder code {
-      font-family: "JetBrains Mono", monospace;
-      background: rgba(0, 0, 0, 0.3);
+      font-family: "IBM Plex Mono", monospace;
+      background: #fffef9;
+      border: 1px solid var(--line);
       padding: 0.2rem 0.5rem;
-      border-radius: 3px;
+      border-radius: 0;
       font-size: 0.85em;
       width: fit-content;
     }
@@ -587,13 +667,13 @@ export class App extends LitElement {
     .llms-doc-content {
       margin: 0;
       padding: 1rem;
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-family: "JetBrains Mono", monospace;
+      background: #fffef9;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      font-family: "IBM Plex Mono", monospace;
       font-size: 0.72rem;
       line-height: 1.6;
-      color: var(--fg);
+      color: var(--ink);
       white-space: pre-wrap;
       word-break: break-all;
       overflow-x: auto;
@@ -604,7 +684,7 @@ export class App extends LitElement {
     return html` <div class="app">
       <h1>
         <a href="/">
-          <span class="header-icon">⚡</span>
+          <span class="header-icon">🐙</span>
           <span class="header-text">RPC Studio</span>
         </a>
       </h1>
@@ -890,6 +970,7 @@ export class App extends LitElement {
         method,
         reqEditorState: createEditorState({
           schema: method.request,
+          theme: "white",
         }),
         response: { kind: "zero-state" } as ResponseState,
       }));
@@ -1012,6 +1093,7 @@ export class App extends LitElement {
         schema: method.response,
         readOnly: true,
         json: data,
+        theme: "white",
       });
       selectedMethod.response = {
         kind: "ok",
