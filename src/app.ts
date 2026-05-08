@@ -550,7 +550,7 @@ export class App extends LitElement {
       position: fixed;
       inset: 0;
       background: rgba(17, 17, 17, 0.4);
-      z-index: 100;
+      z-index: 500;
       display: flex;
       align-items: stretch;
       justify-content: flex-end;
@@ -745,7 +745,7 @@ export class App extends LitElement {
         ${selectedMethod && selectedMethod.response.kind === "loading"
           ? html`<div class="response-panel">
               <div class="panel-header">Response</div>
-              <div class="loading">Sending request...</div>
+              <div class="loading">Waiting for response...</div>
             </div>`
           : ""}
         ${selectedMethod && selectedMethod.response.kind === "error"
@@ -1020,6 +1020,7 @@ export class App extends LitElement {
     }
     const { method } = selectedMethod;
     selectedMethod.response = { kind: "loading" };
+    this.requestUpdate();
     try {
       const jsonState = ensureJsonState(requestEditor.view, method.request);
 
