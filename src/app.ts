@@ -330,6 +330,8 @@ export class App extends LitElement {
     .content-section {
       flex: 1;
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
       overflow: hidden;
       background: var(--bg-panel);
       border: 2px solid var(--line);
@@ -341,6 +343,7 @@ export class App extends LitElement {
     .response-panel {
       flex: 0 0 50%;
       max-width: 50%;
+      width: 50%;
       min-width: 0;
       display: flex;
       flex-direction: column;
@@ -492,22 +495,6 @@ export class App extends LitElement {
       background: var(--bg-panel);
       box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1),
         inset 0 0 0 1px rgba(0, 0, 0, 0.03);
-    }
-
-    @media (max-width: 1024px) {
-      .content-section {
-        flex-direction: column;
-      }
-
-      .request-panel,
-      .response-panel {
-        border-right: none;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .response-panel {
-        border-bottom: none;
-      }
     }
 
     @media (max-width: 768px) {
